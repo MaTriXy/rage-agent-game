@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>RAGE AGENT — rageagent.pro</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     /* ── Reset & base ──────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -922,6 +922,99 @@
       .score-info { gap: 12px; }
       .logo { font-size: 18px; letter-spacing: 4px; }
     }
+
+    /* ── Language switcher ─────────────────────────── */
+    .lang-switcher {
+      display: flex;
+      gap: 2px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 2px;
+    }
+
+    .lang-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      padding: 4px 7px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .lang-btn:hover { color: var(--text); }
+    .lang-btn.active { background: var(--border); color: var(--text); }
+
+    /* ── RTL (Hebrew) ──────────────────────────────── */
+    html[dir="rtl"] body {
+      font-family: 'Heebo', 'Space Grotesk', system-ui, sans-serif;
+    }
+
+    html[dir="rtl"] .message.rex {
+      align-self: flex-end;
+      flex-direction: row;
+    }
+
+    html[dir="rtl"] .message.rex .message-wrap {
+      align-items: flex-end;
+    }
+
+    html[dir="rtl"] .message.rex .bubble {
+      border-top-left-radius: 14px;
+      border-top-right-radius: 4px;
+    }
+
+    html[dir="rtl"] .message.user {
+      align-self: flex-start;
+      flex-direction: row-reverse;
+    }
+
+    html[dir="rtl"] .message.user .message-wrap {
+      align-items: flex-start;
+    }
+
+    html[dir="rtl"] .message.user .bubble {
+      border-top-right-radius: 14px;
+      border-top-left-radius: 4px;
+    }
+
+    html[dir="rtl"] #typing-indicator {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+    }
+
+    html[dir="rtl"] .header-right {
+      flex-direction: row-reverse;
+    }
+
+    html[dir="rtl"] .score-info {
+      flex-direction: row-reverse;
+    }
+
+    html[dir="rtl"] .auth-panel-header {
+      flex-direction: row-reverse;
+    }
+
+    html[dir="rtl"] .auth-tabs {
+      flex-direction: row-reverse;
+    }
+
+    html[dir="rtl"] .submit-actions {
+      flex-direction: row-reverse;
+    }
+
+    html[dir="rtl"] #quick-starts {
+      flex-direction: row-reverse;
+    }
+
+    html[dir="rtl"] .input-row {
+      flex-direction: row-reverse;
+    }
   </style>
 </head>
 <body>
@@ -935,6 +1028,11 @@
     </div>
     <div class="header-right">
       <span id="mode-badge" class="mode-badge">WARMING UP</span>
+      <div class="lang-switcher">
+        <button class="lang-btn active" id="lang-en" onclick="App.setLang('en')">EN</button>
+        <button class="lang-btn" id="lang-es" onclick="App.setLang('es')">ES</button>
+        <button class="lang-btn" id="lang-he" onclick="App.setLang('he')">HE</button>
+      </div>
       <button id="auth-btn" onclick="App.showAuth()">LOG IN</button>
       <button class="btn-icon" id="tts-btn" title="Toggle voice" onclick="App.toggleTTS()">🔊</button>
     </div>
@@ -944,18 +1042,18 @@
   <div id="score-banner">
     <div class="score-info">
       <div>
-        <div class="score-label">RAGE SCORE</div>
+        <div class="score-label" data-i18n="rageScore">RAGE SCORE</div>
         <div class="score-val" id="score-display">0</div>
       </div>
       <div>
-        <div class="score-label">MESSAGES</div>
+        <div class="score-label" data-i18n="messages">MESSAGES</div>
         <div class="score-val" id="msg-count">0</div>
       </div>
     </div>
 
     <div class="rage-meter">
       <div class="rage-meter-label">
-        <span>ANGER LEVEL</span>
+        <span data-i18n="angerLevel">ANGER LEVEL</span>
         <span id="rage-pct">0%</span>
       </div>
       <div class="rage-track">
@@ -963,7 +1061,7 @@
       </div>
     </div>
 
-    <button id="leaderboard-btn" onclick="App.showLeaderboard()">🏆 HALL OF RAGE</button>
+    <button id="leaderboard-btn" onclick="App.showLeaderboard()" data-i18n="hallOfRage">🏆 HALL OF RAGE</button>
   </div>
 
   <!-- Chat -->
@@ -980,13 +1078,13 @@
 
   <!-- Quick starts -->
   <div id="quick-starts">
-    <span style="font-size:11px;color:var(--muted);align-self:center;font-family:'Space Mono',monospace">START:</span>
-    <button class="quick-btn" onclick="App.quickVent('my boss or coworker')">😤 MY BOSS</button>
-    <button class="quick-btn" onclick="App.quickVent('my relationship or partner')">❤️‍🔥 RELATIONSHIP</button>
-    <button class="quick-btn" onclick="App.quickVent('my family')">👨‍👩‍👧 FAMILY</button>
-    <button class="quick-btn" onclick="App.quickVent('social media and the internet')">📱 INTERNET</button>
-    <button class="quick-btn" onclick="App.quickVent('money and financial stress')">💸 MONEY</button>
-    <button class="quick-btn" onclick="App.quickVent('literally everything today')">🌍 EVERYTHING</button>
+    <span style="font-size:11px;color:var(--muted);align-self:center;font-family:'Space Mono',monospace" data-i18n="quickStartLabel">START:</span>
+    <button class="quick-btn" data-topic="boss" onclick="App.quickVent('boss')" data-i18n="quickBoss">😤 MY BOSS</button>
+    <button class="quick-btn" data-topic="relationship" onclick="App.quickVent('relationship')" data-i18n="quickRelationship">❤️‍🔥 RELATIONSHIP</button>
+    <button class="quick-btn" data-topic="family" onclick="App.quickVent('family')" data-i18n="quickFamily">👨‍👩‍👧 FAMILY</button>
+    <button class="quick-btn" data-topic="internet" onclick="App.quickVent('internet')" data-i18n="quickInternet">📱 INTERNET</button>
+    <button class="quick-btn" data-topic="money" onclick="App.quickVent('money')" data-i18n="quickMoney">💸 MONEY</button>
+    <button class="quick-btn" data-topic="everything" onclick="App.quickVent('everything')" data-i18n="quickEverything">🌍 EVERYTHING</button>
   </div>
 
   <!-- Input -->
@@ -998,8 +1096,9 @@
         placeholder="Say it. All of it. No filter needed here."
         rows="1"
         autocomplete="off"
+        data-i18n-placeholder="inputPlaceholder"
       ></textarea>
-      <button id="send-btn" onclick="App.send()">SEND</button>
+      <button id="send-btn" onclick="App.send()" data-i18n="send">SEND</button>
     </div>
   </div>
 
@@ -1010,21 +1109,21 @@
   <div class="auth-panel">
     <div class="auth-panel-header">
       <div>
-        <div class="auth-title">JOIN THE RAGE</div>
-        <div class="auth-subtitle">No email. No BS. Just a username.</div>
+        <div class="auth-title" data-i18n="joinRage">JOIN THE RAGE</div>
+        <div class="auth-subtitle" data-i18n="authSubtitle">No email. No BS. Just a username.</div>
       </div>
       <button class="lb-close" onclick="App.closeAuth()">✕</button>
     </div>
 
     <div class="auth-tabs">
-      <button class="auth-tab active" id="tab-login" onclick="App.switchAuthTab('login')">LOG IN</button>
-      <button class="auth-tab" id="tab-register" onclick="App.switchAuthTab('register')">SIGN UP</button>
+      <button class="auth-tab active" id="tab-login" onclick="App.switchAuthTab('login')" data-i18n="logInTab">LOG IN</button>
+      <button class="auth-tab" id="tab-register" onclick="App.switchAuthTab('register')" data-i18n="signUpTab">SIGN UP</button>
     </div>
 
     <div class="auth-form">
-      <label>USERNAME</label>
+      <label data-i18n="username">USERNAME</label>
       <input type="text" id="auth-username" placeholder="your_rage_name" maxlength="30" autocomplete="username" />
-      <label>PASSWORD</label>
+      <label data-i18n="password">PASSWORD</label>
       <input type="password" id="auth-password" placeholder="••••••••" maxlength="100" autocomplete="current-password" />
       <div class="auth-error" id="auth-error"></div>
       <button class="btn-auth" id="auth-submit-btn" onclick="App.submitAuth()">LOG IN</button>
@@ -1051,8 +1150,8 @@
   <div class="lb-panel">
     <div class="lb-header">
       <div>
-        <div class="lb-title">🏆 HALL OF RAGE</div>
-        <div class="lb-subtitle">The angriest people on the internet. Ranked.</div>
+        <div class="lb-title" data-i18n="lbTitle">🏆 HALL OF RAGE</div>
+        <div class="lb-subtitle" data-i18n="lbSubtitle">The angriest people on the internet. Ranked.</div>
       </div>
       <button class="lb-close" onclick="App.closeLeaderboard()">✕</button>
     </div>
@@ -1066,26 +1165,26 @@
 <div id="submit-modal">
   <div class="submit-panel">
     <div id="submit-form">
-      <div class="submit-title">SESSION COMPLETE 🔥</div>
+      <div class="submit-title" data-i18n="sessionComplete">SESSION COMPLETE 🔥</div>
       <div class="submit-score-display" id="final-score-display">0</div>
       <div class="submit-tier" id="tier-display">MILD ANNOYANCE</div>
-      <p style="font-size:13px;color:var(--muted);margin-bottom:4px">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:4px" data-i18n="makeLeaderboard">
         Make the leaderboard. Go down in history.
       </p>
-      <label>YOUR NAME (or stay anonymous)</label>
-      <input type="text" id="submit-name" placeholder="Anonymous Rager" maxlength="30" />
-      <label>WHAT WERE YOU MAD ABOUT? (optional)</label>
-      <input type="text" id="submit-tagline" placeholder="e.g. My coworker's passive-aggression" maxlength="80" />
+      <label data-i18n="yourName">YOUR NAME (or stay anonymous)</label>
+      <input type="text" id="submit-name" placeholder="Anonymous Rager" maxlength="30" data-i18n-placeholder="namePlaceholder" />
+      <label data-i18n="whatMadAbout">WHAT WERE YOU MAD ABOUT? (optional)</label>
+      <input type="text" id="submit-tagline" placeholder="e.g. My coworker's passive-aggression" maxlength="80" data-i18n-placeholder="taglinePlaceholder" />
       <div class="submit-actions">
-        <button class="btn-submit" onclick="App.submitScore()">SUBMIT TO LEADERBOARD</button>
-        <button class="btn-skip" onclick="App.closeSubmit()">SKIP</button>
+        <button class="btn-submit" onclick="App.submitScore()" data-i18n="submitToLeaderboard">SUBMIT TO LEADERBOARD</button>
+        <button class="btn-skip" onclick="App.closeSubmit()" data-i18n="skip">SKIP</button>
       </div>
     </div>
     <div id="submit-result" style="display:none" class="submit-result">
       <div class="rank-display" id="rank-display">#1</div>
       <p id="rank-msg">You're in the top rage. Congratulations, probably.</p>
-      <button class="btn-submit" style="margin-top:16px;background:#1d9bf0" onclick="App.tweetScore()">𝕏 SHARE YOUR RAGE</button>
-      <button class="btn-close-result" onclick="App.closeSubmit()">BACK TO VENTING</button>
+      <button class="btn-submit" style="margin-top:16px;background:#1d9bf0" onclick="App.tweetScore()" data-i18n="shareRage">𝕏 SHARE YOUR RAGE</button>
+      <button class="btn-close-result" onclick="App.closeSubmit()" data-i18n="backToVenting">BACK TO VENTING</button>
     </div>
   </div>
 </div>
@@ -1094,6 +1193,156 @@
 <div id="toast"></div>
 
 <script>
+const TRANSLATIONS = {
+  en: {
+    logIn: 'LOG IN', logOut: 'LOG OUT',
+    warmingUp: 'WARMING UP', gettingHeated: 'GETTING HEATED',
+    fullyRaging: 'FULLY RAGING', maximumRage: '🔥 MAXIMUM RAGE',
+    rageScore: 'RAGE SCORE', messages: 'MESSAGES', angerLevel: 'ANGER LEVEL',
+    hallOfRage: '🏆 HALL OF RAGE',
+    quickStartLabel: 'START:',
+    quickBoss: '😤 MY BOSS', quickRelationship: '❤️\u{FE0F}\u{200D}🔥 RELATIONSHIP',
+    quickFamily: '👨\u{200D}👩\u{200D}👧 FAMILY', quickInternet: '📱 INTERNET',
+    quickMoney: '💸 MONEY', quickEverything: '🌍 EVERYTHING',
+    topicBoss: 'my boss or coworker', topicRelationship: 'my relationship or partner',
+    topicFamily: 'my family', topicInternet: 'social media and the internet',
+    topicMoney: 'money and financial stress', topicEverything: 'literally everything today',
+    quickVentPrefix: 'I need to vent about',
+    inputPlaceholder: 'Say it. All of it. No filter needed here.',
+    listeningPlaceholder: 'Listening... shout if you want to.',
+    send: 'SEND',
+    welcome: "Ah, another human destroyed by the beautiful chaos of existence. Welcome. I'm RAGE. Whatever's got you twisted right now — say it. All of it. I'm not here to fix you or tell you to calm down. I'm here to GET angry with you. So. What is it.",
+    tierMild: 'MILD ANNOYANCE', tierPissed: 'GENUINELY PISSED',
+    tierFury: 'RIGHTEOUS FURY', tierVolcanic: 'VOLCANIC',
+    tierNuclear: 'NUCLEAR', tierTranscendent: 'TRANSCENDENT RAGE',
+    voiceOn: 'Voice ON — Rex will talk back', voiceOff: 'Voice OFF',
+    loggedOut: 'Logged out. Your rage was real.',
+    twitterNotConfigured: 'Twitter login not configured yet.',
+    submitFailed: 'Failed to submit. Even this is broken.',
+    connectionFailed: 'Connection failed.', fillBothFields: 'Fill in both fields.',
+    lbTitle: '🏆 HALL OF RAGE', lbSubtitle: 'The angriest people on the internet. Ranked.',
+    lbLoading: 'Loading...', lbEmpty: 'No entries yet. Be the first angry person in history.',
+    lbFailed: 'Failed to load. Somehow even the leaderboard is broken today.',
+    sessionComplete: 'SESSION COMPLETE 🔥',
+    makeLeaderboard: 'Make the leaderboard. Go down in history.',
+    yourName: 'YOUR NAME (or stay anonymous)', namePlaceholder: 'Anonymous Rager',
+    whatMadAbout: 'WHAT WERE YOU MAD ABOUT? (optional)',
+    taglinePlaceholder: "e.g. My coworker's passive-aggression",
+    submitToLeaderboard: 'SUBMIT TO LEADERBOARD', skip: 'SKIP',
+    shareRage: '𝕏 SHARE YOUR RAGE', backToVenting: 'BACK TO VENTING',
+    joinRage: 'JOIN THE RAGE', authSubtitle: 'No email. No BS. Just a username.',
+    logInTab: 'LOG IN', signUpTab: 'SIGN UP',
+    username: 'USERNAME', password: 'PASSWORD',
+    createAccount: 'CREATE ACCOUNT', noAccount: 'No account?',
+    signUpFree: 'Sign up free', alreadyRaging: 'Already raging?',
+    continueTwitter: '𝕏 CONTINUE WITH TWITTER',
+    streamError: "Something broke on my end. Technical difficulties, in keeping with the theme of your day. Try again.",
+    rankMsgTop: (r) => `Top ${r}. That's either impressive or concerning. Possibly both.`,
+    rankMsgRest: (r) => `Rank #${r}. Your rage has been immortalized.`,
+    welcomeUser: (u) => `Welcome, ${u}. Let's get angry.`,
+    voiceRecognitionLang: 'en-US',
+    aiLangInstruction: '',
+  },
+  es: {
+    logIn: 'ENTRAR', logOut: 'SALIR',
+    warmingUp: 'CALENTANDO', gettingHeated: 'ENFURECIENDO',
+    fullyRaging: 'FURIA TOTAL', maximumRage: '🔥 FURIA MÁXIMA',
+    rageScore: 'PUNTUACIÓN', messages: 'MENSAJES', angerLevel: 'NIVEL DE IRA',
+    hallOfRage: '🏆 SALA DE RABIA',
+    quickStartLabel: 'INICIO:',
+    quickBoss: '😤 MI JEFE', quickRelationship: '❤️\u{FE0F}\u{200D}🔥 PAREJA',
+    quickFamily: '👨\u{200D}👩\u{200D}👧 FAMILIA', quickInternet: '📱 INTERNET',
+    quickMoney: '💸 DINERO', quickEverything: '🌍 TODO',
+    topicBoss: 'mi jefe o compañero de trabajo', topicRelationship: 'mi relación o pareja',
+    topicFamily: 'mi familia', topicInternet: 'las redes sociales e internet',
+    topicMoney: 'el dinero y el estrés financiero', topicEverything: 'literalmente todo hoy',
+    quickVentPrefix: 'Necesito desahogarme sobre',
+    inputPlaceholder: 'Dilo. Todo. Sin filtros aquí.',
+    listeningPlaceholder: 'Escuchando... grita si quieres.',
+    send: 'ENVIAR',
+    welcome: "Ah, otro humano destrozado por el hermoso caos de la existencia. Bienvenido. Soy RAGE. Lo que sea que te esté revolviendo ahora mismo — dilo. Todo. No estoy aquí para arreglarte ni decirte que te calmes. Estoy aquí para ENOJARME contigo. Entonces. ¿Qué es?",
+    tierMild: 'LEVE IRRITACIÓN', tierPissed: 'GENUINAMENTE ENFADADO',
+    tierFury: 'FURIA JUSTA', tierVolcanic: 'VOLCÁNICO',
+    tierNuclear: 'NUCLEAR', tierTranscendent: 'RABIA TRASCENDENTE',
+    voiceOn: 'Voz ACTIVADA — Rex hablará', voiceOff: 'Voz DESACTIVADA',
+    loggedOut: 'Sesión cerrada. Tu rabia fue real.',
+    twitterNotConfigured: 'Login con Twitter no configurado.',
+    submitFailed: 'Error al enviar. Hasta esto está roto.',
+    connectionFailed: 'Error de conexión.', fillBothFields: 'Rellena ambos campos.',
+    lbTitle: '🏆 SALA DE RABIA', lbSubtitle: 'Las personas más enfadadas de internet. Clasificadas.',
+    lbLoading: 'Cargando...', lbEmpty: 'Sin entradas aún. Sé la primera persona furiosa de la historia.',
+    lbFailed: 'Error al cargar. Hasta la tabla está rota hoy.',
+    sessionComplete: 'SESIÓN COMPLETA 🔥',
+    makeLeaderboard: 'Entra en la tabla. Pasa a la historia.',
+    yourName: 'TU NOMBRE (o quédate anónimo)', namePlaceholder: 'Furioso Anónimo',
+    whatMadAbout: '¿POR QUÉ ESTABAS ENFADADO? (opcional)',
+    taglinePlaceholder: 'ej. La pasivo-agresividad de mi compañero',
+    submitToLeaderboard: 'ENVIAR A LA TABLA', skip: 'SALTAR',
+    shareRage: '𝕏 COMPARTIR MI RABIA', backToVenting: 'VOLVER A DESAHOGARME',
+    joinRage: 'ÚNETE A LA RABIA', authSubtitle: 'Sin email. Sin tonterías. Solo un nombre.',
+    logInTab: 'ENTRAR', signUpTab: 'REGISTRARSE',
+    username: 'USUARIO', password: 'CONTRASEÑA',
+    createAccount: 'CREAR CUENTA', noAccount: '¿Sin cuenta?',
+    signUpFree: 'Regístrate gratis', alreadyRaging: '¿Ya eres furioso?',
+    continueTwitter: '𝕏 CONTINUAR CON TWITTER',
+    streamError: "Algo se rompió de mi lado. Dificultades técnicas, acorde con el tema de tu día. Inténtalo de nuevo.",
+    rankMsgTop: (r) => `Top ${r}. Impresionante o preocupante. Posiblemente ambos.`,
+    rankMsgRest: (r) => `Posición #${r}. Tu rabia ha sido inmortalizada.`,
+    welcomeUser: (u) => `Bienvenido, ${u}. Vamos a enfadarnos.`,
+    voiceRecognitionLang: 'es-ES',
+    aiLangInstruction: 'IMPORTANT: You MUST respond entirely in Spanish. Do not use English.',
+  },
+  he: {
+    logIn: 'כניסה', logOut: 'יציאה',
+    warmingUp: 'מתחמם', gettingHeated: 'מתלהט',
+    fullyRaging: 'זועם לחלוטין', maximumRage: '🔥 זעם מקסימלי',
+    rageScore: 'ניקוד זעם', messages: 'הודעות', angerLevel: 'רמת כעס',
+    hallOfRage: '🏆 היכל הזעם',
+    quickStartLabel: 'התחל:',
+    quickBoss: '😤 הבוס שלי', quickRelationship: '❤️\u{FE0F}\u{200D}🔥 זוגיות',
+    quickFamily: '👨\u{200D}👩\u{200D}👧 משפחה', quickInternet: '📱 אינטרנט',
+    quickMoney: '💸 כסף', quickEverything: '🌍 הכל',
+    topicBoss: 'הבוס או עמית לעבודה שלי', topicRelationship: 'הזוגיות או הפרטנר שלי',
+    topicFamily: 'המשפחה שלי', topicInternet: 'רשתות חברתיות ואינטרנט',
+    topicMoney: 'כסף ולחץ כלכלי', topicEverything: 'ממש הכל היום',
+    quickVentPrefix: 'אני צריך להתפרק על',
+    inputPlaceholder: 'תגיד את זה. הכל. בלי מסננים.',
+    listeningPlaceholder: 'מקשיב... תצעק אם בא לך.',
+    send: 'שלח',
+    welcome: "אה, עוד בן אדם שנמחץ על ידי הכאוס היפהפה של הקיום. ברוך הבא. אני RAGE. מה שמכעיס אותך עכשיו — תגיד את זה. הכל. אני לא כאן לתקן אותך או להגיד לך להירגע. אני כאן לכעוס איתך. אז. מה זה.",
+    tierMild: 'עצבנות קלה', tierPissed: 'ממש עצבני',
+    tierFury: 'זעם צדקני', tierVolcanic: 'וולקני',
+    tierNuclear: 'גרעיני', tierTranscendent: 'זעם נשגב',
+    voiceOn: 'קול פועל — Rex יענה', voiceOff: 'קול כבוי',
+    loggedOut: 'התנתקת. הזעם שלך היה אמיתי.',
+    twitterNotConfigured: 'כניסה עם Twitter לא מוגדרת.',
+    submitFailed: 'שליחה נכשלה. אפילו זה שבור.',
+    connectionFailed: 'החיבור נכשל.', fillBothFields: 'מלא את שני השדות.',
+    lbTitle: '🏆 היכל הזעם', lbSubtitle: 'האנשים הכועסים ביותר באינטרנט. מדורגים.',
+    lbLoading: 'טוען...', lbEmpty: 'אין רשומות עדיין. היה הראשון.',
+    lbFailed: 'טעינה נכשלה. אפילו הטבלה שבורה היום.',
+    sessionComplete: 'סשן הושלם 🔥',
+    makeLeaderboard: 'הכנס לטבלה. היכנס להיסטוריה.',
+    yourName: 'השם שלך (או הישאר אנונימי)', namePlaceholder: 'כועס אנונימי',
+    whatMadAbout: 'על מה כעסת? (אופציונלי)',
+    taglinePlaceholder: 'למשל: הפסיביות האגרסיבית של עמיתי',
+    submitToLeaderboard: 'שלח לטבלה', skip: 'דלג',
+    shareRage: '𝕏 שתף את הזעם שלך', backToVenting: 'חזור להתפרק',
+    joinRage: 'הצטרף לזעם', authSubtitle: 'בלי אימייל. בלי שטויות. רק שם משתמש.',
+    logInTab: 'כניסה', signUpTab: 'הרשמה',
+    username: 'שם משתמש', password: 'סיסמה',
+    createAccount: 'צור חשבון', noAccount: 'אין חשבון?',
+    signUpFree: 'הירשם בחינם', alreadyRaging: 'כבר כועס?',
+    continueTwitter: '𝕏 המשך עם Twitter',
+    streamError: "משהו נשבר אצלי. קשיים טכניים, בהתאם לנושא של היום שלך. נסה שוב.",
+    rankMsgTop: (r) => `מקום ${r}. מרשים או מדאיג. אולי שניהם.`,
+    rankMsgRest: (r) => `מקום #${r}. הזעם שלך הונצח.`,
+    welcomeUser: (u) => `ברוך הבא, ${u}. בוא נכעס.`,
+    voiceRecognitionLang: 'he-IL',
+    aiLangInstruction: 'IMPORTANT: You MUST respond entirely in Hebrew. Do not use English.',
+  },
+};
+
 const App = {
   messages: [],
   score: 0,
@@ -1103,9 +1352,66 @@ const App = {
   ttsEnabled: false,
   recognition: null,
   isRecording: false,
+  lang: 'en',
+
+  // ── i18n ───────────────────────────────────────────
+  t(key) {
+    return TRANSLATIONS[this.lang][key] ?? TRANSLATIONS.en[key] ?? key;
+  },
+
+  setLang(lang) {
+    this.lang = lang;
+    localStorage.setItem('rage_lang', lang);
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === 'he' ? 'rtl' : 'ltr';
+    if (this.recognition) this.recognition.lang = this.t('voiceRecognitionLang');
+    this.applyTranslations();
+    // Update lang button states
+    ['en', 'es', 'he'].forEach(l => {
+      const btn = document.getElementById(`lang-${l}`);
+      if (btn) btn.classList.toggle('active', l === lang);
+    });
+  },
+
+  applyTranslations() {
+    // data-i18n elements
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      el.textContent = this.t(el.dataset.i18n);
+    });
+    // data-i18n-placeholder elements
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+      el.placeholder = this.t(el.dataset.i18nPlaceholder);
+    });
+    // Auth button text (if not logged in)
+    if (!this.authUser) {
+      const btn = document.getElementById('auth-btn');
+      if (btn) btn.textContent = this.t('logIn');
+    }
+    // Auth submit button
+    const authSubmitBtn = document.getElementById('auth-submit-btn');
+    if (authSubmitBtn) {
+      authSubmitBtn.textContent = this.authTab === 'login' ? this.t('logInTab') : this.t('createAccount');
+    }
+    // Auth footer
+    const footer = document.getElementById('auth-footer');
+    if (footer) {
+      if (this.authTab === 'login') {
+        footer.innerHTML = `${this.t('noAccount')} <a href="#" style="color:var(--orange);text-decoration:none" onclick="App.switchAuthTab('register');return false">${this.t('signUpFree')}</a>`;
+      } else {
+        footer.innerHTML = `${this.t('alreadyRaging')} <a href="#" style="color:var(--orange);text-decoration:none" onclick="App.switchAuthTab('login');return false">${this.t('logIn')}</a>`;
+      }
+    }
+    // Twitter login button
+    const twitterBtn = document.getElementById('twitter-login-btn');
+    if (twitterBtn) twitterBtn.textContent = this.t('continueTwitter');
+    // Mode badge - re-apply current rage level text
+    this.updateDisplay();
+  },
 
   // ── Init ───────────────────────────────────────────
   init() {
+    const savedLang = localStorage.getItem('rage_lang') || 'en';
+    this.setLang(savedLang);
     this.setupSpeech();
     this.autoResize();
     this.checkSpeechSupport();
@@ -1126,7 +1432,7 @@ const App = {
     this.recognition = new SR();
     this.recognition.continuous = false;
     this.recognition.interimResults = true;
-    this.recognition.lang = 'en-US';
+    this.recognition.lang = this.t('voiceRecognitionLang');
 
     this.recognition.onresult = (e) => {
       const transcript = Array.from(e.results)
@@ -1163,8 +1469,7 @@ const App = {
   // ── Welcome ────────────────────────────────────────
   async showWelcome() {
     await this.sleep(400);
-    const greeting = "Ah, another human destroyed by the beautiful chaos of existence. Welcome. I'm RAGE. Whatever's got you twisted right now — say it. All of it. I'm not here to fix you or tell you to calm down. I'm here to GET angry with you. So. What is it.";
-    this.addMessage('rex', greeting, true);
+    this.addMessage('rex', this.t('welcome'), true);
   },
 
   // ── Send ───────────────────────────────────────────
@@ -1196,7 +1501,7 @@ const App = {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: this.messages }),
+        body: JSON.stringify({ messages: this.messages, lang: this.lang }),
       });
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -1244,7 +1549,7 @@ const App = {
 
     } catch (err) {
       document.getElementById('typing-indicator').style.display = 'none';
-      this.addMessage('rex', `Something broke on my end. Technical difficulties, in keeping with the theme of your day. Try again.`);
+      this.addMessage('rex', this.t('streamError'));
     }
 
     this.isStreaming = false;
@@ -1284,19 +1589,19 @@ const App = {
 
     if (this.rageLevel < 25) {
       bar.style.background = '#ffcc00';
-      badge.textContent = 'WARMING UP';
+      badge.textContent = this.t('warmingUp');
       badge.className = 'mode-badge';
     } else if (this.rageLevel < 50) {
       bar.style.background = '#ff8800';
-      badge.textContent = 'GETTING HEATED';
+      badge.textContent = this.t('gettingHeated');
       badge.className = 'mode-badge';
     } else if (this.rageLevel < 75) {
       bar.style.background = '#ff4400';
-      badge.textContent = 'FULLY RAGING';
+      badge.textContent = this.t('fullyRaging');
       badge.className = 'mode-badge hot';
     } else {
       bar.style.background = '#ff0000';
-      badge.textContent = '🔥 MAXIMUM RAGE';
+      badge.textContent = this.t('maximumRage');
       badge.className = 'mode-badge hot';
     }
   },
@@ -1313,12 +1618,12 @@ const App = {
   },
 
   getTier(score) {
-    if (score < 100)  return { label: 'MILD ANNOYANCE', emoji: '😒' };
-    if (score < 300)  return { label: 'GENUINELY PISSED', emoji: '😠' };
-    if (score < 700)  return { label: 'RIGHTEOUS FURY', emoji: '😤' };
-    if (score < 1500) return { label: 'VOLCANIC', emoji: '🌋' };
-    if (score < 3000) return { label: 'NUCLEAR', emoji: '☢️' };
-    return { label: 'TRANSCENDENT RAGE', emoji: '👑' };
+    if (score < 100)  return { label: this.t('tierMild'), emoji: '😒' };
+    if (score < 300)  return { label: this.t('tierPissed'), emoji: '😠' };
+    if (score < 700)  return { label: this.t('tierFury'), emoji: '😤' };
+    if (score < 1500) return { label: this.t('tierVolcanic'), emoji: '🌋' };
+    if (score < 3000) return { label: this.t('tierNuclear'), emoji: '☢️' };
+    return { label: this.t('tierTranscendent'), emoji: '👑' };
   },
 
   // ── Messages ───────────────────────────────────────
@@ -1385,9 +1690,13 @@ const App = {
   },
 
   // ── Quick start ────────────────────────────────────
-  quickVent(topic) {
+  quickVent(topicKey) {
+    const topicMap = { boss: 'topicBoss', relationship: 'topicRelationship',
+      family: 'topicFamily', internet: 'topicInternet',
+      money: 'topicMoney', everything: 'topicEverything' };
+    const topic = this.t(topicMap[topicKey] || topicKey);
     const input = document.getElementById('input');
-    input.value = `I need to vent about ${topic}`;
+    input.value = `${this.t('quickVentPrefix')} ${topic}`;
     input.focus();
     input.style.height = 'auto';
     input.style.height = input.scrollHeight + 'px';
@@ -1399,7 +1708,7 @@ const App = {
     if (!this.ttsEnabled) window.speechSynthesis?.cancel();
     const btn = document.getElementById('tts-btn');
     btn.textContent = this.ttsEnabled ? '🔊' : '🔇';
-    this.toast(this.ttsEnabled ? 'Voice ON — Rex will talk back' : 'Voice OFF');
+    this.toast(this.ttsEnabled ? this.t('voiceOn') : this.t('voiceOff'));
   },
 
   speak(text) {
@@ -1431,7 +1740,7 @@ const App = {
     if (!this.recognition || this.isRecording) return;
     this.isRecording = true;
     document.getElementById('mic-btn').classList.add('recording');
-    document.getElementById('input').placeholder = 'Listening... shout if you want to.';
+    document.getElementById('input').placeholder = this.t('listeningPlaceholder');
     try { this.recognition.start(); } catch (e) { this.stopRecording(); }
   },
 
@@ -1439,7 +1748,7 @@ const App = {
     if (!this.recognition) return;
     this.isRecording = false;
     document.getElementById('mic-btn').classList.remove('recording');
-    document.getElementById('input').placeholder = 'Say it. All of it. No filter needed here.';
+    document.getElementById('input').placeholder = this.t('inputPlaceholder');
     try { this.recognition.stop(); } catch (e) {}
   },
 
@@ -1447,14 +1756,14 @@ const App = {
   async showLeaderboard() {
     document.getElementById('lb-modal').classList.add('open');
     const list = document.getElementById('lb-list');
-    list.innerHTML = '<div class="lb-empty">Loading...</div>';
+    list.innerHTML = `<div class="lb-empty">${this.t('lbLoading')}</div>`;
 
     try {
       const res = await fetch('/api/leaderboard');
       const data = await res.json();
 
       if (!data.length) {
-        list.innerHTML = '<div class="lb-empty">No entries yet. Be the first angry person in history.</div>';
+        list.innerHTML = `<div class="lb-empty">${this.t('lbEmpty')}</div>`;
         return;
       }
 
@@ -1474,7 +1783,7 @@ const App = {
           </div>`;
       }).join('');
     } catch (err) {
-      list.innerHTML = '<div class="lb-empty">Failed to load. Somehow even the leaderboard is broken today.</div>';
+      list.innerHTML = `<div class="lb-empty">${this.t('lbFailed')}</div>`;
     }
   },
 
@@ -1508,11 +1817,11 @@ const App = {
       document.getElementById('rank-display').textContent = `#${data.rank}`;
       document.getElementById('rank-msg').textContent =
         data.rank <= 3
-          ? `Top ${data.rank}. That's either impressive or concerning. Possibly both.`
-          : `Rank #${data.rank}. Your rage has been immortalized.`;
+          ? TRANSLATIONS[this.lang].rankMsgTop(data.rank)
+          : TRANSLATIONS[this.lang].rankMsgRest(data.rank);
       document.getElementById('submit-result').style.display = 'block';
     } catch (e) {
-      this.toast('Failed to submit. Even this is broken.');
+      this.toast(this.t('submitFailed'));
     }
   },
 
@@ -1539,7 +1848,7 @@ const App = {
       this.authUser = twitterUser;
       this.updateAuthUI();
       await this.sleep(600);
-      this.toast(`Welcome, ${twitterUser}. Let's get angry.`);
+      this.toast(TRANSLATIONS[this.lang].welcomeUser(twitterUser));
       document.getElementById('submit-name').value = twitterUser;
       return;
     }
@@ -1548,7 +1857,7 @@ const App = {
     if (errorParam) {
       window.history.replaceState({}, '', '/');
       if (errorParam === 'twitter_not_configured') {
-        this.toast('Twitter login not configured yet.');
+        this.toast(this.t('twitterNotConfigured'));
       }
     }
 
@@ -1582,7 +1891,7 @@ const App = {
       btn.title = 'Click to log out';
       btn.onclick = () => this.logout();
     } else {
-      btn.textContent = 'LOG IN';
+      btn.textContent = this.t('logIn');
       btn.className = '';
       btn.title = '';
       btn.onclick = () => this.showAuth();
@@ -1606,10 +1915,10 @@ const App = {
     this.authTab = tab;
     document.getElementById('tab-login').classList.toggle('active', tab === 'login');
     document.getElementById('tab-register').classList.toggle('active', tab === 'register');
-    document.getElementById('auth-submit-btn').textContent = tab === 'login' ? 'LOG IN' : 'CREATE ACCOUNT';
+    document.getElementById('auth-submit-btn').textContent = tab === 'login' ? this.t('logInTab') : this.t('createAccount');
     document.getElementById('auth-footer').innerHTML = tab === 'login'
-      ? 'No account? <a href="#" style="color:var(--orange);text-decoration:none" onclick="App.switchAuthTab(\'register\');return false">Sign up free</a>'
-      : 'Already raging? <a href="#" style="color:var(--orange);text-decoration:none" onclick="App.switchAuthTab(\'login\');return false">Log in</a>';
+      ? `${this.t('noAccount')} <a href="#" style="color:var(--orange);text-decoration:none" onclick="App.switchAuthTab('register');return false">${this.t('signUpFree')}</a>`
+      : `${this.t('alreadyRaging')} <a href="#" style="color:var(--orange);text-decoration:none" onclick="App.switchAuthTab('login');return false">${this.t('logIn')}</a>`;
     document.getElementById('auth-error').textContent = '';
     document.getElementById('auth-password').autocomplete = tab === 'login' ? 'current-password' : 'new-password';
   },
@@ -1621,7 +1930,7 @@ const App = {
     const btn = document.getElementById('auth-submit-btn');
 
     if (!username || !password) {
-      errEl.textContent = 'Fill in both fields.';
+      errEl.textContent = this.t('fillBothFields');
       return;
     }
 
@@ -1641,7 +1950,7 @@ const App = {
       if (!res.ok) {
         errEl.textContent = data.error || 'Something went wrong.';
         btn.disabled = false;
-        btn.textContent = this.authTab === 'login' ? 'LOG IN' : 'CREATE ACCOUNT';
+        btn.textContent = this.authTab === 'login' ? this.t('logInTab') : this.t('createAccount');
         return;
       }
 
@@ -1651,15 +1960,15 @@ const App = {
       localStorage.setItem('rage_username', data.username);
       this.updateAuthUI();
       this.closeAuth();
-      this.toast(`Welcome, ${data.username}. Let's get angry.`);
+      this.toast(TRANSLATIONS[this.lang].welcomeUser(data.username));
 
       // Pre-fill leaderboard name field
       document.getElementById('submit-name').value = data.username;
 
     } catch (e) {
-      errEl.textContent = 'Connection failed.';
+      errEl.textContent = this.t('connectionFailed');
       btn.disabled = false;
-      btn.textContent = this.authTab === 'login' ? 'LOG IN' : 'CREATE ACCOUNT';
+      btn.textContent = this.authTab === 'login' ? this.t('logInTab') : this.t('createAccount');
     }
   },
 
@@ -1669,7 +1978,7 @@ const App = {
     localStorage.removeItem('rage_token');
     localStorage.removeItem('rage_username');
     this.updateAuthUI();
-    this.toast('Logged out. Your rage was real.');
+    this.toast(this.t('loggedOut'));
   },
 
   // ── Twitter sharing ────────────────────────────────

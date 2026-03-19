@@ -128,12 +128,18 @@ app.post('/api/chat', async (req, res) => {
   res.setHeader('Connection', 'keep-alive');
   res.flushHeaders();
 
-  const { messages } = req.body;
+  const { messages, lang } = req.body;
 
   if (!messages || !Array.isArray(messages)) {
     res.write(`data: ${JSON.stringify({ error: 'Invalid messages' })}\n\n`);
     return res.end();
   }
+
+  const LANG_INSTRUCTIONS = {
+    es: '\n\nIMPORTANT: You MUST respond entirely in Spanish. Do not use English.',
+    he: '\n\nIMPORTANT: You MUST respond entirely in Hebrew (עברית). Do not use English.',
+  };
+  const systemPrompt = SYSTEM_PROMPT + (LANG_INSTRUCTIONS[lang] || '');
 
   try {
     const ollamaRes = await fetch(`${OLLAMA_URL}/api/chat`, {
@@ -143,7 +149,7 @@ app.post('/api/chat', async (req, res) => {
         model: OLLAMA_MODEL,
         stream: true,
         messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'system', content: systemPrompt },
           ...messages,
         ],
       }),
