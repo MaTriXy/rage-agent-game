@@ -1,0 +1,15 @@
+{
+  "name": "rage-agent",
+  "version": "1.0.0",
+  "description": "RAGE AGENT — rageagent.pro — the sarcastic AI anger companion with a leaderboard",
+  "type": "module",
+  "scripts": {
+    "start": "node --env-file=.env server.js",
+    "dev": "node --env-file=.env --watch server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "express": "^4.18.2",
+    "twitter-api-v2": "^1.29.0"
+  }
+}

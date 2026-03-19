@@ -1,0 +1,6 @@
+node_modules/
+.env
+users.json
+leaderboard.json
+.DS_Store
+.claude/

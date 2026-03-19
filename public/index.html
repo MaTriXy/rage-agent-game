@@ -1,0 +1,1741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RAGE AGENT — rageagent.pro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Reset & base ──────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #080808;
+      --surface: #111;
+      --card: #161616;
+      --border: #222;
+      --red: #ff2e2e;
+      --orange: #ff6b1a;
+      --yellow: #ffcc00;
+      --text: #f0f0f0;
+      --muted: #666;
+      --rex-bg: #1a0808;
+      --rex-border: #3a1010;
+      --user-bg: #08081a;
+      --user-border: #10103a;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Space Grotesk', system-ui, sans-serif;
+      overflow: hidden;
+    }
+
+    /* ── Layout ────────────────────────────────────── */
+    #app {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* ── Header ────────────────────────────────────── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+      flex-shrink: 0;
+      z-index: 10;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Space Mono', monospace;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 4px;
+      color: var(--red);
+      text-shadow: 0 0 30px rgba(255,46,46,0.4);
+    }
+
+    .logo-flame {
+      font-size: 24px;
+      animation: flicker 1.5s ease-in-out infinite;
+    }
+
+    @keyframes flicker {
+      0%, 100% { opacity: 1; transform: scale(1) rotate(-3deg); }
+      25% { opacity: 0.8; transform: scale(1.05) rotate(2deg); }
+      50% { opacity: 1; transform: scale(0.98) rotate(-1deg); }
+      75% { opacity: 0.9; transform: scale(1.03) rotate(3deg); }
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mode-badge {
+      font-size: 11px;
+      font-family: 'Space Mono', monospace;
+      letter-spacing: 2px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--orange);
+      color: var(--orange);
+      transition: all 0.3s;
+    }
+
+    .mode-badge.hot {
+      border-color: var(--red);
+      color: var(--red);
+      box-shadow: 0 0 10px rgba(255,46,46,0.3);
+    }
+
+    .btn-icon {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      cursor: pointer;
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: all 0.2s;
+    }
+
+    .btn-icon:hover { border-color: var(--red); color: var(--text); }
+
+    /* ── Score banner ──────────────────────────────── */
+    #score-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 20px;
+      background: linear-gradient(90deg, var(--bg), #1a0404, var(--bg));
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .score-info {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .score-val {
+      font-family: 'Space Mono', monospace;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--yellow);
+      text-shadow: 0 0 15px rgba(255,204,0,0.4);
+      transition: all 0.3s;
+    }
+
+    .score-label {
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .rage-meter {
+      flex: 1;
+      max-width: 300px;
+      margin: 0 20px;
+    }
+
+    .rage-meter-label {
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .rage-track {
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    #rage-bar {
+      height: 100%;
+      width: 0%;
+      border-radius: 3px;
+      background: var(--yellow);
+      transition: width 0.5s ease, background 0.5s ease;
+    }
+
+    #leaderboard-btn {
+      font-size: 11px;
+      font-family: 'Space Mono', monospace;
+      letter-spacing: 1px;
+      padding: 5px 12px;
+      background: none;
+      border: 1px solid var(--orange);
+      color: var(--orange);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    #leaderboard-btn:hover {
+      background: rgba(255,107,26,0.1);
+      box-shadow: 0 0 10px rgba(255,107,26,0.3);
+    }
+
+    /* ── Chat area ─────────────────────────────────── */
+    #chat-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+
+    #chat-area::-webkit-scrollbar { width: 4px; }
+    #chat-area::-webkit-scrollbar-track { background: transparent; }
+    #chat-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .message {
+      display: flex;
+      gap: 12px;
+      max-width: 85%;
+      animation: fadeSlide 0.25s ease;
+    }
+
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .message.rex { align-self: flex-start; }
+    .message.user { align-self: flex-end; flex-direction: row-reverse; }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .rex .avatar {
+      background: var(--rex-border);
+      border: 1px solid var(--rex-border);
+    }
+
+    .user .avatar {
+      background: var(--user-border);
+      border: 1px solid var(--user-border);
+      font-size: 13px;
+      font-family: 'Space Mono', monospace;
+      font-weight: 700;
+      color: #6688ff;
+    }
+
+    .bubble {
+      padding: 12px 16px;
+      border-radius: 14px;
+      line-height: 1.6;
+      font-size: 14.5px;
+    }
+
+    .rex .bubble {
+      background: var(--rex-bg);
+      border: 1px solid var(--rex-border);
+      border-top-left-radius: 4px;
+      color: var(--text);
+    }
+
+    .user .bubble {
+      background: var(--user-bg);
+      border: 1px solid var(--user-border);
+      border-top-right-radius: 4px;
+      color: var(--text);
+    }
+
+    /* ── Typing indicator ──────────────────────────── */
+    #typing-indicator {
+      display: none;
+      align-self: flex-start;
+      align-items: center;
+      gap: 12px;
+      animation: fadeSlide 0.2s ease;
+    }
+
+    .typing-dots {
+      display: flex;
+      gap: 5px;
+      padding: 12px 16px;
+      background: var(--rex-bg);
+      border: 1px solid var(--rex-border);
+      border-radius: 14px;
+      border-top-left-radius: 4px;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      background: var(--red);
+      border-radius: 50%;
+      animation: bounce 1.2s ease-in-out infinite;
+    }
+
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes bounce {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+      30% { transform: translateY(-6px); opacity: 1; }
+    }
+
+    /* ── Quick starts ──────────────────────────────── */
+    #quick-starts {
+      padding: 10px 20px 0;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+
+    .quick-btn {
+      font-size: 12px;
+      font-family: 'Space Mono', monospace;
+      padding: 5px 12px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .quick-btn:hover {
+      border-color: var(--red);
+      color: var(--text);
+      background: rgba(255,46,46,0.08);
+    }
+
+    /* ── Input area ────────────────────────────────── */
+    #input-area {
+      padding: 14px 20px 18px;
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+    }
+
+    #input {
+      flex: 1;
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 14px;
+      padding: 12px 16px;
+      border-radius: 12px;
+      resize: none;
+      min-height: 46px;
+      max-height: 120px;
+      outline: none;
+      transition: border-color 0.2s;
+      line-height: 1.5;
+    }
+
+    #input::placeholder { color: var(--muted); }
+
+    #input:focus {
+      border-color: #333;
+    }
+
+    #mic-btn {
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    #mic-btn:hover { border-color: var(--orange); color: var(--orange); }
+
+    #mic-btn.recording {
+      border-color: var(--red);
+      background: rgba(255,46,46,0.1);
+      color: var(--red);
+      box-shadow: 0 0 0 0 rgba(255,46,46,0.4);
+      animation: pulse-mic 1s infinite;
+    }
+
+    @keyframes pulse-mic {
+      0% { box-shadow: 0 0 0 0 rgba(255,46,46,0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(255,46,46,0); }
+      100% { box-shadow: 0 0 0 0 rgba(255,46,46,0); }
+    }
+
+    #send-btn {
+      height: 46px;
+      padding: 0 20px;
+      border-radius: 12px;
+      border: none;
+      background: var(--red);
+      color: white;
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    #send-btn:hover { background: #ff4444; box-shadow: 0 0 20px rgba(255,46,46,0.4); }
+    #send-btn:disabled { background: #333; color: var(--muted); cursor: not-allowed; box-shadow: none; }
+
+    /* ── Leaderboard modal ─────────────────────────── */
+    #lb-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    #lb-modal.open { display: flex; }
+
+    .lb-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 540px;
+      max-height: 80vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .lb-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .lb-title {
+      font-family: 'Space Mono', monospace;
+      font-size: 16px;
+      letter-spacing: 3px;
+      color: var(--orange);
+    }
+
+    .lb-subtitle {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    .lb-close {
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 20px;
+      line-height: 1;
+      padding: 4px;
+    }
+
+    .lb-close:hover { color: var(--text); }
+
+    #lb-list {
+      overflow-y: auto;
+      flex: 1;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .lb-entry {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 14px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      transition: border-color 0.2s;
+    }
+
+    .lb-entry:hover { border-color: #333; }
+
+    .lb-rank {
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      color: var(--muted);
+      width: 28px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .lb-rank.top { color: var(--yellow); font-weight: 700; }
+
+    .lb-info { flex: 1; min-width: 0; }
+
+    .lb-name {
+      font-weight: 600;
+      font-size: 14px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .lb-tagline {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .lb-score {
+      font-family: 'Space Mono', monospace;
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--yellow);
+      flex-shrink: 0;
+    }
+
+    .lb-date {
+      font-size: 10px;
+      color: var(--muted);
+      flex-shrink: 0;
+    }
+
+    .lb-empty {
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+      padding: 40px 0;
+    }
+
+    /* ── Submit score modal ────────────────────────── */
+    #submit-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    #submit-modal.open { display: flex; }
+
+    .submit-panel {
+      background: var(--surface);
+      border: 1px solid var(--orange);
+      border-radius: 16px;
+      padding: 28px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 0 40px rgba(255,107,26,0.2);
+    }
+
+    .submit-title {
+      font-family: 'Space Mono', monospace;
+      font-size: 18px;
+      letter-spacing: 2px;
+      color: var(--orange);
+      margin-bottom: 6px;
+    }
+
+    .submit-score-display {
+      font-size: 48px;
+      font-family: 'Space Mono', monospace;
+      font-weight: 700;
+      color: var(--yellow);
+      text-shadow: 0 0 30px rgba(255,204,0,0.5);
+      margin: 14px 0;
+      line-height: 1;
+    }
+
+    .submit-tier {
+      font-size: 12px;
+      letter-spacing: 3px;
+      color: var(--orange);
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .submit-panel label {
+      display: block;
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      margin-top: 14px;
+    }
+
+    .submit-panel input,
+    .submit-panel input[type=text] {
+      width: 100%;
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 14px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      outline: none;
+    }
+
+    .submit-panel input:focus { border-color: var(--orange); }
+
+    .submit-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn-submit {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background: var(--red);
+      color: white;
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-submit:hover { background: #ff4444; box-shadow: 0 0 20px rgba(255,46,46,0.4); }
+
+    .btn-skip {
+      padding: 12px 18px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: none;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-skip:hover { border-color: var(--muted); color: var(--text); }
+
+    /* ── Toast ─────────────────────────────────────── */
+    #toast {
+      position: fixed;
+      bottom: 90px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--card);
+      border: 1px solid var(--orange);
+      color: var(--text);
+      font-size: 13px;
+      padding: 10px 20px;
+      border-radius: 30px;
+      opacity: 0;
+      transition: all 0.3s;
+      pointer-events: none;
+      z-index: 200;
+      white-space: nowrap;
+    }
+
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ── No-speech fallback ────────────────────────── */
+    .no-speech #mic-btn { display: none; }
+
+    /* ── Score result ──────────────────────────────── */
+    .submit-result {
+      text-align: center;
+      padding: 10px 0;
+    }
+
+    .submit-result .rank-display {
+      font-family: 'Space Mono', monospace;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--yellow);
+      margin-bottom: 8px;
+    }
+
+    .submit-result p {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .btn-close-result {
+      margin-top: 16px;
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: none;
+      color: var(--text);
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .btn-close-result:hover { border-color: var(--orange); color: var(--orange); }
+
+    /* ── Auth button ───────────────────────────────── */
+    #auth-btn {
+      font-size: 12px;
+      font-family: 'Space Mono', monospace;
+      padding: 5px 12px;
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    #auth-btn:hover { border-color: var(--orange); color: var(--orange); }
+    #auth-btn.logged-in { border-color: #2a4a2a; color: #66bb66; }
+
+    /* ── Auth modal ────────────────────────────────── */
+    #auth-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    #auth-modal.open { display: flex; }
+
+    .auth-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: 0 0 40px rgba(255,46,46,0.1);
+    }
+
+    .auth-tabs {
+      display: flex;
+      margin-bottom: 22px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .auth-tab {
+      flex: 1;
+      background: none;
+      border: none;
+      padding: 10px;
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 2px;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: all 0.2s;
+    }
+
+    .auth-tab.active {
+      color: var(--red);
+      border-bottom-color: var(--red);
+    }
+
+    .auth-form label {
+      display: block;
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      margin-top: 14px;
+    }
+
+    .auth-form input {
+      width: 100%;
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 14px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .auth-form input:focus { border-color: var(--red); }
+
+    .auth-error {
+      font-size: 12px;
+      color: var(--red);
+      margin-top: 10px;
+      min-height: 18px;
+    }
+
+    .btn-auth {
+      width: 100%;
+      margin-top: 18px;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background: var(--red);
+      color: white;
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-auth:hover { background: #ff4444; box-shadow: 0 0 20px rgba(255,46,46,0.4); }
+    .btn-auth:disabled { background: #333; color: var(--muted); cursor: not-allowed; box-shadow: none; }
+
+    .auth-footer {
+      margin-top: 14px;
+      text-align: center;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .auth-close {
+      position: absolute;
+      top: 0;
+      right: 0;
+    }
+
+    .auth-panel-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .auth-title {
+      font-family: 'Space Mono', monospace;
+      font-size: 16px;
+      letter-spacing: 3px;
+      color: var(--red);
+    }
+
+    .auth-subtitle {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* ── Tweet button ──────────────────────────────── */
+    .message-wrap {
+      display: flex;
+      flex-direction: column;
+      max-width: 85%;
+    }
+
+    .message.rex .message-wrap { align-items: flex-start; }
+    .message.user .message-wrap { align-items: flex-end; }
+
+    .tweet-btn {
+      display: none;
+      align-items: center;
+      gap: 5px;
+      margin-top: 5px;
+      padding: 3px 10px;
+      background: none;
+      border: 1px solid #1d9bf0;
+      color: #1d9bf0;
+      border-radius: 20px;
+      font-size: 11px;
+      font-family: 'Space Mono', monospace;
+      cursor: pointer;
+      opacity: 0.6;
+      transition: all 0.2s;
+    }
+
+    .message.rex:hover .tweet-btn,
+    .tweet-btn:focus { display: flex; opacity: 1; }
+
+    .tweet-btn:hover {
+      background: rgba(29,155,240,0.1);
+      opacity: 1;
+    }
+
+    /* ── Responsive ────────────────────────────────── */
+    @media (max-width: 600px) {
+      .rage-meter { display: none; }
+      .score-info { gap: 12px; }
+      .logo { font-size: 18px; letter-spacing: 4px; }
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- Header -->
+  <header>
+    <div class="logo">
+      <span class="logo-flame">🔥</span>
+      RAGE AGENT
+    </div>
+    <div class="header-right">
+      <span id="mode-badge" class="mode-badge">WARMING UP</span>
+      <button id="auth-btn" onclick="App.showAuth()">LOG IN</button>
+      <button class="btn-icon" id="tts-btn" title="Toggle voice" onclick="App.toggleTTS()">🔊</button>
+    </div>
+  </header>
+
+  <!-- Score banner -->
+  <div id="score-banner">
+    <div class="score-info">
+      <div>
+        <div class="score-label">RAGE SCORE</div>
+        <div class="score-val" id="score-display">0</div>
+      </div>
+      <div>
+        <div class="score-label">MESSAGES</div>
+        <div class="score-val" id="msg-count">0</div>
+      </div>
+    </div>
+
+    <div class="rage-meter">
+      <div class="rage-meter-label">
+        <span>ANGER LEVEL</span>
+        <span id="rage-pct">0%</span>
+      </div>
+      <div class="rage-track">
+        <div id="rage-bar"></div>
+      </div>
+    </div>
+
+    <button id="leaderboard-btn" onclick="App.showLeaderboard()">🏆 HALL OF RAGE</button>
+  </div>
+
+  <!-- Chat -->
+  <div id="chat-area">
+    <div id="typing-indicator">
+      <div class="avatar" style="background:#1a0808;border-color:#3a1010">🔥</div>
+      <div class="typing-dots">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick starts -->
+  <div id="quick-starts">
+    <span style="font-size:11px;color:var(--muted);align-self:center;font-family:'Space Mono',monospace">START:</span>
+    <button class="quick-btn" onclick="App.quickVent('my boss or coworker')">😤 MY BOSS</button>
+    <button class="quick-btn" onclick="App.quickVent('my relationship or partner')">❤️‍🔥 RELATIONSHIP</button>
+    <button class="quick-btn" onclick="App.quickVent('my family')">👨‍👩‍👧 FAMILY</button>
+    <button class="quick-btn" onclick="App.quickVent('social media and the internet')">📱 INTERNET</button>
+    <button class="quick-btn" onclick="App.quickVent('money and financial stress')">💸 MONEY</button>
+    <button class="quick-btn" onclick="App.quickVent('literally everything today')">🌍 EVERYTHING</button>
+  </div>
+
+  <!-- Input -->
+  <div id="input-area">
+    <div class="input-row">
+      <button id="mic-btn" title="Hold to speak" onclick="App.toggleRecording()">🎤</button>
+      <textarea
+        id="input"
+        placeholder="Say it. All of it. No filter needed here."
+        rows="1"
+        autocomplete="off"
+      ></textarea>
+      <button id="send-btn" onclick="App.send()">SEND</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Auth modal -->
+<div id="auth-modal">
+  <div class="auth-panel">
+    <div class="auth-panel-header">
+      <div>
+        <div class="auth-title">JOIN THE RAGE</div>
+        <div class="auth-subtitle">No email. No BS. Just a username.</div>
+      </div>
+      <button class="lb-close" onclick="App.closeAuth()">✕</button>
+    </div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" onclick="App.switchAuthTab('login')">LOG IN</button>
+      <button class="auth-tab" id="tab-register" onclick="App.switchAuthTab('register')">SIGN UP</button>
+    </div>
+
+    <div class="auth-form">
+      <label>USERNAME</label>
+      <input type="text" id="auth-username" placeholder="your_rage_name" maxlength="30" autocomplete="username" />
+      <label>PASSWORD</label>
+      <input type="password" id="auth-password" placeholder="••••••••" maxlength="100" autocomplete="current-password" />
+      <div class="auth-error" id="auth-error"></div>
+      <button class="btn-auth" id="auth-submit-btn" onclick="App.submitAuth()">LOG IN</button>
+    </div>
+
+    <div class="auth-footer" id="auth-footer">
+      No account? <a href="#" style="color:var(--orange);text-decoration:none" onclick="App.switchAuthTab('register');return false">Sign up free</a>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:10px;margin-top:16px">
+      <div style="flex:1;height:1px;background:var(--border)"></div>
+      <span style="font-size:11px;color:var(--muted);font-family:'Space Mono',monospace">OR</span>
+      <div style="flex:1;height:1px;background:var(--border)"></div>
+    </div>
+
+    <a href="/auth/twitter" id="twitter-login-btn" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:14px;padding:11px;border:1px solid #1d9bf0;border-radius:8px;background:none;color:#1d9bf0;font-family:'Space Mono',monospace;font-size:12px;letter-spacing:1px;text-decoration:none;transition:all 0.2s" onmouseover="this.style.background='rgba(29,155,240,0.1)'" onmouseout="this.style.background='none'">
+      𝕏 CONTINUE WITH TWITTER
+    </a>
+  </div>
+</div>
+
+<!-- Leaderboard modal -->
+<div id="lb-modal">
+  <div class="lb-panel">
+    <div class="lb-header">
+      <div>
+        <div class="lb-title">🏆 HALL OF RAGE</div>
+        <div class="lb-subtitle">The angriest people on the internet. Ranked.</div>
+      </div>
+      <button class="lb-close" onclick="App.closeLeaderboard()">✕</button>
+    </div>
+    <div id="lb-list">
+      <div class="lb-empty">Loading the angry people...</div>
+    </div>
+  </div>
+</div>
+
+<!-- Submit score modal -->
+<div id="submit-modal">
+  <div class="submit-panel">
+    <div id="submit-form">
+      <div class="submit-title">SESSION COMPLETE 🔥</div>
+      <div class="submit-score-display" id="final-score-display">0</div>
+      <div class="submit-tier" id="tier-display">MILD ANNOYANCE</div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:4px">
+        Make the leaderboard. Go down in history.
+      </p>
+      <label>YOUR NAME (or stay anonymous)</label>
+      <input type="text" id="submit-name" placeholder="Anonymous Rager" maxlength="30" />
+      <label>WHAT WERE YOU MAD ABOUT? (optional)</label>
+      <input type="text" id="submit-tagline" placeholder="e.g. My coworker's passive-aggression" maxlength="80" />
+      <div class="submit-actions">
+        <button class="btn-submit" onclick="App.submitScore()">SUBMIT TO LEADERBOARD</button>
+        <button class="btn-skip" onclick="App.closeSubmit()">SKIP</button>
+      </div>
+    </div>
+    <div id="submit-result" style="display:none" class="submit-result">
+      <div class="rank-display" id="rank-display">#1</div>
+      <p id="rank-msg">You're in the top rage. Congratulations, probably.</p>
+      <button class="btn-submit" style="margin-top:16px;background:#1d9bf0" onclick="App.tweetScore()">𝕏 SHARE YOUR RAGE</button>
+      <button class="btn-close-result" onclick="App.closeSubmit()">BACK TO VENTING</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+const App = {
+  messages: [],
+  score: 0,
+  rageLevel: 0,
+  msgCount: 0,
+  isStreaming: false,
+  ttsEnabled: false,
+  recognition: null,
+  isRecording: false,
+
+  // ── Init ───────────────────────────────────────────
+  init() {
+    this.setupSpeech();
+    this.autoResize();
+    this.checkSpeechSupport();
+    this.initAuth();
+    this.showWelcome();
+  },
+
+  checkSpeechSupport() {
+    if (!('SpeechRecognition' in window) && !('webkitSpeechRecognition' in window)) {
+      document.body.classList.add('no-speech');
+    }
+  },
+
+  setupSpeech() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) return;
+
+    this.recognition = new SR();
+    this.recognition.continuous = false;
+    this.recognition.interimResults = true;
+    this.recognition.lang = 'en-US';
+
+    this.recognition.onresult = (e) => {
+      const transcript = Array.from(e.results)
+        .map(r => r[0].transcript)
+        .join('');
+      document.getElementById('input').value = transcript;
+      if (e.results[e.results.length - 1].isFinal) {
+        this.stopRecording();
+        this.send();
+      }
+    };
+
+    this.recognition.onerror = () => this.stopRecording();
+    this.recognition.onend = () => {
+      this.isRecording = false;
+      document.getElementById('mic-btn').classList.remove('recording');
+    };
+  },
+
+  autoResize() {
+    const input = document.getElementById('input');
+    input.addEventListener('input', () => {
+      input.style.height = 'auto';
+      input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+    });
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        this.send();
+      }
+    });
+  },
+
+  // ── Welcome ────────────────────────────────────────
+  async showWelcome() {
+    await this.sleep(400);
+    const greeting = "Ah, another human destroyed by the beautiful chaos of existence. Welcome. I'm RAGE. Whatever's got you twisted right now — say it. All of it. I'm not here to fix you or tell you to calm down. I'm here to GET angry with you. So. What is it.";
+    this.addMessage('rex', greeting, true);
+  },
+
+  // ── Send ───────────────────────────────────────────
+  async send() {
+    const input = document.getElementById('input');
+    const text = input.value.trim();
+    if (!text || this.isStreaming) return;
+
+    input.value = '';
+    input.style.height = 'auto';
+
+    this.addMessage('user', text);
+    this.calculateScore(text);
+    this.msgCount++;
+    document.getElementById('msg-count').textContent = this.msgCount;
+
+    this.messages.push({ role: 'user', content: text });
+    await this.streamResponse();
+  },
+
+  // ── Stream response ────────────────────────────────
+  async streamResponse() {
+    this.isStreaming = true;
+    document.getElementById('send-btn').disabled = true;
+    document.getElementById('typing-indicator').style.display = 'flex';
+    this.scrollBottom();
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: this.messages }),
+      });
+
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+      document.getElementById('typing-indicator').style.display = 'none';
+      const bubble = this.addMessage('rex', '', false, true);
+
+      const reader = res.body.getReader();
+      const dec = new TextDecoder();
+      let buf = '';
+      let full = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buf += dec.decode(value, { stream: true });
+        const lines = buf.split('\n');
+        buf = lines.pop();
+
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          const data = line.slice(6).trim();
+          if (data === '[DONE]') break;
+          try {
+            const { text, error } = JSON.parse(data);
+            if (error) throw new Error(error);
+            if (text) {
+              full += text;
+              bubble.textContent = full;
+              this.scrollBottom();
+            }
+          } catch (e) {}
+        }
+      }
+
+      this.messages.push({ role: 'assistant', content: full });
+      if (this.ttsEnabled && full) this.speak(full);
+      if (full) this.attachTweetBtn(bubble.parentElement, bubble);
+
+      // Offer leaderboard submit after 8+ messages
+      if (this.msgCount >= 8 && this.msgCount % 8 === 0) {
+        this.offerSubmit();
+      }
+
+    } catch (err) {
+      document.getElementById('typing-indicator').style.display = 'none';
+      this.addMessage('rex', `Something broke on my end. Technical difficulties, in keeping with the theme of your day. Try again.`);
+    }
+
+    this.isStreaming = false;
+    document.getElementById('send-btn').disabled = false;
+  },
+
+  // ── Scoring ────────────────────────────────────────
+  calculateScore(text) {
+    const words = text.trim().split(/\s+/).length;
+    const caps = (text.match(/[A-Z]{3,}/g) || []).length;
+    const bangs = (text.match(/!/g) || []).length;
+    const questions = (text.match(/\?/g) || []).length;
+    const curseMult = /\b(fuck|shit|damn|hell|bullshit|ass|bitch|crap|bastard)\b/i.test(text) ? 1.5 : 1;
+
+    let pts = Math.round((words * 3 + caps * 15 + bangs * 5 + questions * 3) * curseMult);
+    pts = Math.max(pts, words * 2); // minimum pts
+    this.score += pts;
+
+    // Rage level (0-100, asymptotic)
+    this.rageLevel = Math.min(99, this.rageLevel + Math.min(words * 2 + caps * 8, 20));
+
+    this.updateDisplay();
+  },
+
+  updateDisplay() {
+    // Score with animation
+    const el = document.getElementById('score-display');
+    const from = parseInt(el.textContent.replace(/,/g, '')) || 0;
+    this.animateNumber(el, from, this.score, 400);
+
+    // Rage bar
+    const bar = document.getElementById('rage-bar');
+    const pct = document.getElementById('rage-pct');
+    const badge = document.getElementById('mode-badge');
+    bar.style.width = this.rageLevel + '%';
+    pct.textContent = Math.round(this.rageLevel) + '%';
+
+    if (this.rageLevel < 25) {
+      bar.style.background = '#ffcc00';
+      badge.textContent = 'WARMING UP';
+      badge.className = 'mode-badge';
+    } else if (this.rageLevel < 50) {
+      bar.style.background = '#ff8800';
+      badge.textContent = 'GETTING HEATED';
+      badge.className = 'mode-badge';
+    } else if (this.rageLevel < 75) {
+      bar.style.background = '#ff4400';
+      badge.textContent = 'FULLY RAGING';
+      badge.className = 'mode-badge hot';
+    } else {
+      bar.style.background = '#ff0000';
+      badge.textContent = '🔥 MAXIMUM RAGE';
+      badge.className = 'mode-badge hot';
+    }
+  },
+
+  animateNumber(el, from, to, duration) {
+    const start = performance.now();
+    const update = (now) => {
+      const p = Math.min((now - start) / duration, 1);
+      const val = Math.round(from + (to - from) * p);
+      el.textContent = val.toLocaleString();
+      if (p < 1) requestAnimationFrame(update);
+    };
+    requestAnimationFrame(update);
+  },
+
+  getTier(score) {
+    if (score < 100)  return { label: 'MILD ANNOYANCE', emoji: '😒' };
+    if (score < 300)  return { label: 'GENUINELY PISSED', emoji: '😠' };
+    if (score < 700)  return { label: 'RIGHTEOUS FURY', emoji: '😤' };
+    if (score < 1500) return { label: 'VOLCANIC', emoji: '🌋' };
+    if (score < 3000) return { label: 'NUCLEAR', emoji: '☢️' };
+    return { label: 'TRANSCENDENT RAGE', emoji: '👑' };
+  },
+
+  // ── Messages ───────────────────────────────────────
+  addMessage(role, text, typewriter = false, streaming = false) {
+    const chat = document.getElementById('chat-area');
+    const typing = document.getElementById('typing-indicator');
+
+    const wrap = document.createElement('div');
+    wrap.className = `message ${role}`;
+
+    const avatar = document.createElement('div');
+    avatar.className = 'avatar';
+    avatar.textContent = role === 'rex' ? '🔥' : 'YOU';
+
+    const msgWrap = document.createElement('div');
+    msgWrap.className = 'message-wrap';
+
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+
+    if (typewriter && text) {
+      this.typewriter(bubble, text, 18, () => this.attachTweetBtn(msgWrap, bubble));
+    } else {
+      bubble.textContent = text;
+    }
+
+    msgWrap.appendChild(bubble);
+
+    // Tweet button on RAGE messages (non-streaming added after text is set)
+    if (role === 'rex' && text && !streaming) {
+      this.attachTweetBtn(msgWrap, bubble);
+    }
+
+    wrap.appendChild(avatar);
+    wrap.appendChild(msgWrap);
+    chat.insertBefore(wrap, typing);
+    this.scrollBottom();
+
+    return bubble;
+  },
+
+  attachTweetBtn(container, bubble) {
+    // Avoid duplicates
+    if (container.querySelector('.tweet-btn')) return;
+    const btn = document.createElement('button');
+    btn.className = 'tweet-btn';
+    btn.innerHTML = '𝕏 Tweet this';
+    btn.onclick = () => this.tweetResponse(bubble.textContent);
+    container.appendChild(btn);
+  },
+
+  async typewriter(el, text, speed = 18, onDone) {
+    for (let i = 0; i <= text.length; i++) {
+      el.textContent = text.slice(0, i);
+      await this.sleep(speed);
+      this.scrollBottom();
+    }
+    if (onDone) onDone();
+  },
+
+  scrollBottom() {
+    const chat = document.getElementById('chat-area');
+    chat.scrollTop = chat.scrollHeight;
+  },
+
+  // ── Quick start ────────────────────────────────────
+  quickVent(topic) {
+    const input = document.getElementById('input');
+    input.value = `I need to vent about ${topic}`;
+    input.focus();
+    input.style.height = 'auto';
+    input.style.height = input.scrollHeight + 'px';
+  },
+
+  // ── TTS ────────────────────────────────────────────
+  toggleTTS() {
+    this.ttsEnabled = !this.ttsEnabled;
+    if (!this.ttsEnabled) window.speechSynthesis?.cancel();
+    const btn = document.getElementById('tts-btn');
+    btn.textContent = this.ttsEnabled ? '🔊' : '🔇';
+    this.toast(this.ttsEnabled ? 'Voice ON — Rex will talk back' : 'Voice OFF');
+  },
+
+  speak(text) {
+    if (!this.ttsEnabled || !window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utt = new SpeechSynthesisUtterance(text);
+    utt.rate = 1.05;
+    utt.pitch = 0.85;
+    utt.volume = 1;
+    const voices = window.speechSynthesis.getVoices();
+    const pick = voices.find(v =>
+      v.name.includes('Daniel') || v.name.includes('Alex') ||
+      v.name.includes('Google UK English Male') || (v.lang === 'en-US' && !v.name.includes('Female'))
+    );
+    if (pick) utt.voice = pick;
+    window.speechSynthesis.speak(utt);
+  },
+
+  // ── Recording ──────────────────────────────────────
+  toggleRecording() {
+    if (this.isRecording) {
+      this.stopRecording();
+    } else {
+      this.startRecording();
+    }
+  },
+
+  startRecording() {
+    if (!this.recognition || this.isRecording) return;
+    this.isRecording = true;
+    document.getElementById('mic-btn').classList.add('recording');
+    document.getElementById('input').placeholder = 'Listening... shout if you want to.';
+    try { this.recognition.start(); } catch (e) { this.stopRecording(); }
+  },
+
+  stopRecording() {
+    if (!this.recognition) return;
+    this.isRecording = false;
+    document.getElementById('mic-btn').classList.remove('recording');
+    document.getElementById('input').placeholder = 'Say it. All of it. No filter needed here.';
+    try { this.recognition.stop(); } catch (e) {}
+  },
+
+  // ── Leaderboard ────────────────────────────────────
+  async showLeaderboard() {
+    document.getElementById('lb-modal').classList.add('open');
+    const list = document.getElementById('lb-list');
+    list.innerHTML = '<div class="lb-empty">Loading...</div>';
+
+    try {
+      const res = await fetch('/api/leaderboard');
+      const data = await res.json();
+
+      if (!data.length) {
+        list.innerHTML = '<div class="lb-empty">No entries yet. Be the first angry person in history.</div>';
+        return;
+      }
+
+      list.innerHTML = data.map((e, i) => {
+        const tier = this.getTier(e.score);
+        const rankClass = i < 3 ? 'top' : '';
+        const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`;
+        return `
+          <div class="lb-entry">
+            <div class="lb-rank ${rankClass}">${medal}</div>
+            <div class="lb-info">
+              <div class="lb-name">${tier.emoji} ${this.esc(e.name)}</div>
+              ${e.tagline ? `<div class="lb-tagline">"${this.esc(e.tagline)}"</div>` : ''}
+            </div>
+            <div class="lb-score">${e.score.toLocaleString()}</div>
+            <div class="lb-date">${e.date}</div>
+          </div>`;
+      }).join('');
+    } catch (err) {
+      list.innerHTML = '<div class="lb-empty">Failed to load. Somehow even the leaderboard is broken today.</div>';
+    }
+  },
+
+  closeLeaderboard() {
+    document.getElementById('lb-modal').classList.remove('open');
+  },
+
+  // ── Submit score ───────────────────────────────────
+  offerSubmit() {
+    if (this.score < 50) return;
+    const tier = this.getTier(this.score);
+    document.getElementById('final-score-display').textContent = this.score.toLocaleString();
+    document.getElementById('tier-display').textContent = `${tier.emoji} ${tier.label}`;
+    document.getElementById('submit-form').style.display = 'block';
+    document.getElementById('submit-result').style.display = 'none';
+    document.getElementById('submit-modal').classList.add('open');
+  },
+
+  async submitScore() {
+    const name = document.getElementById('submit-name').value.trim() || 'Anonymous Rager';
+    const tagline = document.getElementById('submit-tagline').value.trim();
+
+    try {
+      const res = await fetch('/api/leaderboard', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, score: this.score, tagline }),
+      });
+      const data = await res.json();
+      document.getElementById('submit-form').style.display = 'none';
+      document.getElementById('rank-display').textContent = `#${data.rank}`;
+      document.getElementById('rank-msg').textContent =
+        data.rank <= 3
+          ? `Top ${data.rank}. That's either impressive or concerning. Possibly both.`
+          : `Rank #${data.rank}. Your rage has been immortalized.`;
+      document.getElementById('submit-result').style.display = 'block';
+    } catch (e) {
+      this.toast('Failed to submit. Even this is broken.');
+    }
+  },
+
+  closeSubmit() {
+    document.getElementById('submit-modal').classList.remove('open');
+  },
+
+  // ── Auth ───────────────────────────────────────────
+  authTab: 'login',
+  authToken: null,
+  authUser: null,
+
+  async initAuth() {
+    // Handle Twitter OAuth callback (token passed as query param)
+    const params = new URLSearchParams(window.location.search);
+    const twitterToken = params.get('twitter_auth');
+    const twitterUser = params.get('twitter_user');
+    if (twitterToken && twitterUser) {
+      localStorage.setItem('rage_token', twitterToken);
+      localStorage.setItem('rage_username', twitterUser);
+      // Clean URL
+      window.history.replaceState({}, '', '/');
+      this.authToken = twitterToken;
+      this.authUser = twitterUser;
+      this.updateAuthUI();
+      await this.sleep(600);
+      this.toast(`Welcome, ${twitterUser}. Let's get angry.`);
+      document.getElementById('submit-name').value = twitterUser;
+      return;
+    }
+
+    const errorParam = params.get('error');
+    if (errorParam) {
+      window.history.replaceState({}, '', '/');
+      if (errorParam === 'twitter_not_configured') {
+        this.toast('Twitter login not configured yet.');
+      }
+    }
+
+    const token = localStorage.getItem('rage_token');
+    const username = localStorage.getItem('rage_username');
+    if (token && username) {
+      // Verify token is still valid
+      try {
+        const res = await fetch('/api/me', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          this.authToken = token;
+          this.authUser = username;
+          this.updateAuthUI();
+          document.getElementById('submit-name').value = username;
+          return;
+        }
+      } catch (e) {}
+      // Token invalid, clear it
+      localStorage.removeItem('rage_token');
+      localStorage.removeItem('rage_username');
+    }
+  },
+
+  updateAuthUI() {
+    const btn = document.getElementById('auth-btn');
+    if (this.authUser) {
+      btn.textContent = this.authUser.toUpperCase();
+      btn.className = 'logged-in';
+      btn.title = 'Click to log out';
+      btn.onclick = () => this.logout();
+    } else {
+      btn.textContent = 'LOG IN';
+      btn.className = '';
+      btn.title = '';
+      btn.onclick = () => this.showAuth();
+    }
+  },
+
+  showAuth() {
+    if (this.authUser) { this.logout(); return; }
+    document.getElementById('auth-modal').classList.add('open');
+    document.getElementById('auth-error').textContent = '';
+    document.getElementById('auth-username').value = '';
+    document.getElementById('auth-password').value = '';
+    setTimeout(() => document.getElementById('auth-username').focus(), 50);
+  },
+
+  closeAuth() {
+    document.getElementById('auth-modal').classList.remove('open');
+  },
+
+  switchAuthTab(tab) {
+    this.authTab = tab;
+    document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+    document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+    document.getElementById('auth-submit-btn').textContent = tab === 'login' ? 'LOG IN' : 'CREATE ACCOUNT';
+    document.getElementById('auth-footer').innerHTML = tab === 'login'
+      ? 'No account? <a href="#" style="color:var(--orange);text-decoration:none" onclick="App.switchAuthTab(\'register\');return false">Sign up free</a>'
+      : 'Already raging? <a href="#" style="color:var(--orange);text-decoration:none" onclick="App.switchAuthTab(\'login\');return false">Log in</a>';
+    document.getElementById('auth-error').textContent = '';
+    document.getElementById('auth-password').autocomplete = tab === 'login' ? 'current-password' : 'new-password';
+  },
+
+  async submitAuth() {
+    const username = document.getElementById('auth-username').value.trim();
+    const password = document.getElementById('auth-password').value;
+    const errEl = document.getElementById('auth-error');
+    const btn = document.getElementById('auth-submit-btn');
+
+    if (!username || !password) {
+      errEl.textContent = 'Fill in both fields.';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = '...';
+    errEl.textContent = '';
+
+    try {
+      const endpoint = this.authTab === 'login' ? '/api/login' : '/api/register';
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        errEl.textContent = data.error || 'Something went wrong.';
+        btn.disabled = false;
+        btn.textContent = this.authTab === 'login' ? 'LOG IN' : 'CREATE ACCOUNT';
+        return;
+      }
+
+      this.authToken = data.token;
+      this.authUser = data.username;
+      localStorage.setItem('rage_token', data.token);
+      localStorage.setItem('rage_username', data.username);
+      this.updateAuthUI();
+      this.closeAuth();
+      this.toast(`Welcome, ${data.username}. Let's get angry.`);
+
+      // Pre-fill leaderboard name field
+      document.getElementById('submit-name').value = data.username;
+
+    } catch (e) {
+      errEl.textContent = 'Connection failed.';
+      btn.disabled = false;
+      btn.textContent = this.authTab === 'login' ? 'LOG IN' : 'CREATE ACCOUNT';
+    }
+  },
+
+  logout() {
+    this.authToken = null;
+    this.authUser = null;
+    localStorage.removeItem('rage_token');
+    localStorage.removeItem('rage_username');
+    this.updateAuthUI();
+    this.toast('Logged out. Your rage was real.');
+  },
+
+  // ── Twitter sharing ────────────────────────────────
+  tweetResponse(text) {
+    const MAX = 220;
+    const handle = '@therageagent';
+    const truncated = text.length > MAX ? text.slice(0, MAX - 1) + '…' : text;
+    const tweet = `"${truncated}"\n\n— ${handle} 🔥`;
+    window.open(
+      `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweet)}`,
+      '_blank', 'width=600,height=400,noopener'
+    );
+  },
+
+  tweetScore() {
+    const tier = this.getTier(this.score);
+    const tweet = `I just hit ${this.score.toLocaleString()} points — ${tier.emoji} ${tier.label} — on @therageagent 🔥\n\nrageagent.pro`;
+    window.open(
+      `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweet)}`,
+      '_blank', 'width=600,height=400,noopener'
+    );
+  },
+
+  // ── Toast ──────────────────────────────────────────
+  toast(msg, duration = 2500) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(this._toastTimer);
+    this._toastTimer = setTimeout(() => el.classList.remove('show'), duration);
+  },
+
+  // ── Utils ──────────────────────────────────────────
+  esc(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  },
+
+  sleep(ms) {
+    return new Promise(r => setTimeout(r, ms));
+  },
+};
+
+window.addEventListener('DOMContentLoaded', () => App.init());
+
+// Close modals on backdrop click
+document.getElementById('lb-modal').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('lb-modal')) App.closeLeaderboard();
+});
+document.getElementById('submit-modal').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('submit-modal')) App.closeSubmit();
+});
+document.getElementById('auth-modal').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('auth-modal')) App.closeAuth();
+});
+
+// Submit auth on Enter key
+document.getElementById('auth-password').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') App.submitAuth();
+});
+document.getElementById('auth-username').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') document.getElementById('auth-password').focus();
+});
+</script>
+</body>
+</html>
