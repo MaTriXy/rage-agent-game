@@ -923,6 +923,245 @@
       .logo { font-size: 18px; letter-spacing: 4px; }
     }
 
+    /* ── Quote carousel ────────────────────────────── */
+    #quote-carousel {
+      padding: 8px 20px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(90deg, var(--bg), #100a00, var(--bg));
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+      min-height: 46px;
+      cursor: default;
+    }
+
+    .quote-label {
+      font-size: 9px;
+      font-family: 'Space Mono', monospace;
+      letter-spacing: 2px;
+      color: var(--orange);
+      opacity: 0.7;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .quote-content {
+      flex: 1;
+      overflow: hidden;
+      transition: opacity 0.35s;
+    }
+
+    .quote-content.fade { opacity: 0; }
+
+    .quote-text {
+      font-size: 12px;
+      color: var(--muted);
+      font-style: italic;
+      line-height: 1.4;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .quote-author {
+      font-size: 10px;
+      color: var(--orange);
+      opacity: 0.6;
+      margin-top: 1px;
+    }
+
+    .quote-nav {
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .quote-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--border);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .quote-dot.active { background: var(--orange); }
+
+    /* ── Score info ─────────────────────────────────── */
+    .score-info-btn {
+      background: none;
+      border: 1px solid transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 10px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Space Mono', monospace;
+      opacity: 0.5;
+      transition: opacity 0.2s;
+      padding: 0;
+      margin-left: 4px;
+      vertical-align: middle;
+    }
+
+    .score-info-btn:hover { opacity: 1; border-color: var(--muted); }
+
+    #score-info-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    #score-info-modal.open { display: flex; }
+
+    .score-info-panel {
+      background: var(--surface);
+      border: 1px solid var(--yellow);
+      border-radius: 16px;
+      padding: 28px;
+      width: 100%;
+      max-width: 480px;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 0 40px rgba(255,204,0,0.12);
+    }
+
+    .score-info-title {
+      font-family: 'Space Mono', monospace;
+      font-size: 17px;
+      letter-spacing: 2px;
+      color: var(--yellow);
+      margin-bottom: 4px;
+    }
+
+    .score-info-subtitle {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 22px;
+      line-height: 1.5;
+    }
+
+    .score-category { margin-bottom: 18px; }
+
+    .score-category-title {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--orange);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .score-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 7px 12px;
+      border-radius: 8px;
+      background: var(--card);
+      margin-bottom: 4px;
+      font-size: 13px;
+    }
+
+    .score-item-pts {
+      font-family: 'Space Mono', monospace;
+      font-size: 12px;
+      color: var(--yellow);
+      flex-shrink: 0;
+    }
+
+    .score-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 16px 0;
+    }
+
+    .score-info-footer {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.6;
+      font-style: italic;
+    }
+
+    /* ── Privacy modal ──────────────────────────────── */
+    #privacy-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    #privacy-modal.open { display: flex; }
+
+    .privacy-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      width: 100%;
+      max-width: 540px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .privacy-panel h2 {
+      font-family: 'Space Mono', monospace;
+      font-size: 15px;
+      letter-spacing: 3px;
+      color: var(--text);
+      margin-bottom: 18px;
+    }
+
+    .privacy-panel h3 {
+      font-family: 'Space Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--orange);
+      text-transform: uppercase;
+      margin: 16px 0 6px;
+    }
+
+    .privacy-panel p {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 10px;
+    }
+
+    /* ── App footer ─────────────────────────────────── */
+    #app-footer {
+      text-align: center;
+      padding: 3px 0 5px;
+      font-size: 10px;
+      color: var(--muted);
+      opacity: 0.35;
+      font-family: 'Space Mono', monospace;
+      letter-spacing: 1px;
+      flex-shrink: 0;
+    }
+
+    #app-footer a {
+      color: var(--muted);
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    #app-footer a:hover { opacity: 1; color: var(--text); }
+
     /* ── Language switcher ─────────────────────────── */
     .lang-switcher {
       display: flex;
@@ -1042,7 +1281,7 @@
   <div id="score-banner">
     <div class="score-info">
       <div>
-        <div class="score-label" data-i18n="rageScore">RAGE SCORE</div>
+        <div class="score-label"><span data-i18n="rageScore">RAGE SCORE</span><button class="score-info-btn" onclick="App.showScoreInfo()" title="How scoring works">?</button></div>
         <div class="score-val" id="score-display">0</div>
       </div>
       <div>
@@ -1062,6 +1301,16 @@
     </div>
 
     <button id="leaderboard-btn" onclick="App.showLeaderboard()" data-i18n="hallOfRage">🏆 HALL OF RAGE</button>
+  </div>
+
+  <!-- Quote carousel -->
+  <div id="quote-carousel">
+    <span class="quote-label">💬 RAGE OF THE DAY</span>
+    <div class="quote-content" id="quote-content">
+      <div class="quote-text" id="quote-text"></div>
+      <div class="quote-author" id="quote-author"></div>
+    </div>
+    <div class="quote-nav" id="quote-nav"></div>
   </div>
 
   <!-- Chat -->
@@ -1100,6 +1349,11 @@
       ></textarea>
       <button id="send-btn" onclick="App.send()" data-i18n="send">SEND</button>
     </div>
+  </div>
+
+  <!-- Footer -->
+  <div id="app-footer">
+    <a onclick="App.showPrivacy()">Privacy & Terms</a> · rageagent.pro
   </div>
 
 </div>
@@ -1192,7 +1446,92 @@
 <!-- Toast -->
 <div id="toast"></div>
 
+<!-- Score info modal -->
+<div id="score-info-modal">
+  <div class="score-info-panel">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+      <div class="score-info-title" data-i18n="scoreInfoTitle">🔥 HOW TO RAGE HARDER</div>
+      <button class="lb-close" onclick="App.closeScoreInfo()">✕</button>
+    </div>
+    <div class="score-info-subtitle" data-i18n="scoreInfoSubtitle">Your rage score is calculated in real time. Here's how to max it out.</div>
+
+    <div class="score-category">
+      <div class="score-category-title" data-i18n="scoreBaseTitle">BASE POINTS (per message)</div>
+      <div class="score-item"><span>Each word</span><span class="score-item-pts">+3 pts</span></div>
+      <div class="score-item"><span>ALL CAPS word (3+ letters)</span><span class="score-item-pts">+15 pts</span></div>
+      <div class="score-item"><span>Exclamation mark !</span><span class="score-item-pts">+5 pts</span></div>
+      <div class="score-item"><span>Question mark ?</span><span class="score-item-pts">+3 pts</span></div>
+      <div class="score-item"><span>Profanity used</span><span class="score-item-pts">×1.5</span></div>
+      <div class="score-item"><span>Intensity words (hate, furious, livid…)</span><span class="score-item-pts">+10 pts each</span></div>
+    </div>
+
+    <div class="score-divider"></div>
+
+    <div class="score-category">
+      <div class="score-category-title" data-i18n="scoreTopicTitle">TOPIC MULTIPLIERS</div>
+      <div class="score-item"><span>👨‍👩‍👧 Family drama</span><span class="score-item-pts">+30%</span></div>
+      <div class="score-item"><span>💍 Marriage / divorce issues</span><span class="score-item-pts">+25%</span></div>
+      <div class="score-item"><span>💔 Dating / breakup</span><span class="score-item-pts">+20%</span></div>
+      <div class="score-item"><span>💸 Money / debt problems</span><span class="score-item-pts">+15%</span></div>
+      <div class="score-item"><span>😴 Exhaustion / can't sleep</span><span class="score-item-pts">+15%</span></div>
+      <div class="score-item"><span>👔 Boss / workplace</span><span class="score-item-pts">+10%</span></div>
+    </div>
+
+    <div class="score-divider"></div>
+
+    <div class="score-category">
+      <div class="score-category-title" data-i18n="scoreBonusTitle">BONUS BOOSTS</div>
+      <div class="score-item"><span>🎤 Used voice / mic</span><span class="score-item-pts">+20%</span></div>
+    </div>
+
+    <div class="score-info-footer" data-i18n="scoreInfoFooter">
+      Scores are additive. Stack the multipliers. A short, CAPS-FILLED, profanity-laced rant about your mother-in-law at 2am — while shouting into the mic — is worth more than a novel.
+    </div>
+  </div>
+</div>
+
+<!-- Privacy & Terms modal -->
+<div id="privacy-modal">
+  <div class="privacy-panel">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+      <h2>PRIVACY & TERMS</h2>
+      <button class="lb-close" onclick="App.closePrivacy()">✕</button>
+    </div>
+    <h3>We don't read your messages</h3>
+    <p>RAGE AGENT does not store, review, moderate, or monitor the content of any conversations. Your venting is between you and the AI. We have neither the desire nor the infrastructure to read what you typed about your mother-in-law.</p>
+    <h3>No liability</h3>
+    <p>RAGE AGENT is a creative expression tool for entertainment and emotional release. It is not a mental health service, licensed therapist, or crisis intervention platform. If you are in genuine distress, please contact a qualified professional.</p>
+    <p>By using this service, you agree that we are not liable for any actions you take, feelings you feel, or decisions you make based on responses from the AI.</p>
+    <h3>What we store</h3>
+    <p>We store only what you explicitly submit to the public leaderboard — your chosen display name, your rage score, and an optional tagline you provide. Conversations are never saved. There is no account database with personal data unless you create an account with a username and password.</p>
+    <h3>Accounts</h3>
+    <p>Anonymous accounts require only a username and password — no email, no name, no phone number. Twitter/X login is handled via OAuth; we receive only your Twitter username, not your email or followers.</p>
+    <h3>Content</h3>
+    <p>You are responsible for the content you type. Do not use RAGE AGENT to target, threaten, or harass real individuals. This is a place to vent — not a weapon.</p>
+    <h3>Changes</h3>
+    <p>We may update these terms. Continued use of the service means you accept any changes. Last updated: March 2026.</p>
+    <button class="btn-close-result" style="margin-top:16px" onclick="App.closePrivacy()">GOT IT</button>
+  </div>
+</div>
+
 <script>
+const RAGE_QUOTES = [
+  { text: "My landlord raised the rent AND broke the heater. In January. The man is an artist of suffering.", author: "Mike, Chicago" },
+  { text: "My coworker cc's everyone on every email. 'Keeping everyone in the loop.' THE LOOP IS A PRISON.", author: "Sara, London" },
+  { text: "My mom called to ask why I haven't visited. Then put me on hold for 20 minutes.", author: "Yoni, Tel Aviv" },
+  { text: "Worked overtime all month. My reward was a pizza party. A PIZZA PARTY.", author: "Carlos, Madrid" },
+  { text: "My boyfriend forgot our anniversary. He remembered his car's oil change though.", author: "Aisha, Toronto" },
+  { text: "Three meetings today that could have been one email. Which could have been nothing.", author: "David, New York" },
+  { text: "My sister-in-law offered 'constructive criticism' about my parenting. She has a goldfish.", author: "Noa, Tel Aviv" },
+  { text: "Worked 60 hours to hit a deadline. They moved the deadline. After I hit it.", author: "James, Sydney" },
+  { text: "My internet crashed mid-presentation. The hold music was 'Don't Worry Be Happy'.", author: "Sofia, Buenos Aires" },
+  { text: "Got a 'wellness program' at work. It's a step counter. So they can monitor us while underpaying us.", author: "Pita, Auckland" },
+  { text: "My wife said 'we need to talk' and then watched 40 minutes of TV first.", author: "Tom, Dublin" },
+  { text: "My doctor told me to 'reduce stress'. I'm on a waiting list to reduce stress.", author: "Yuki, Tokyo" },
+  { text: "My neighbor plays guitar. Badly. Only at 11pm. As if on schedule.", author: "Lena, Berlin" },
+  { text: "My bank charged me a fee for having too little money. The audacity is historic.", author: "Marcus, Lagos" },
+];
+
 const TRANSLATIONS = {
   en: {
     logIn: 'LOG IN', logOut: 'LOG OUT',
@@ -1237,6 +1576,12 @@ const TRANSLATIONS = {
     signUpFree: 'Sign up free', alreadyRaging: 'Already raging?',
     continueTwitter: '𝕏 CONTINUE WITH TWITTER',
     streamError: "Something broke on my end. Technical difficulties, in keeping with the theme of your day. Try again.",
+    scoreInfoTitle: '🔥 HOW TO RAGE HARDER',
+    scoreInfoSubtitle: 'Your rage score is calculated in real time. Here\'s how to max it out.',
+    scoreBaseTitle: 'BASE POINTS (per message)',
+    scoreTopicTitle: 'TOPIC MULTIPLIERS',
+    scoreBonusTitle: 'BONUS BOOSTS',
+    scoreInfoFooter: 'Scores are additive. Stack the multipliers. A short, CAPS-FILLED, profanity-laced rant about your mother-in-law at 2am — while shouting into the mic — is worth more than a novel.',
     rankMsgTop: (r) => `Top ${r}. That's either impressive or concerning. Possibly both.`,
     rankMsgRest: (r) => `Rank #${r}. Your rage has been immortalized.`,
     welcomeUser: (u) => `Welcome, ${u}. Let's get angry.`,
@@ -1286,6 +1631,12 @@ const TRANSLATIONS = {
     signUpFree: 'Regístrate gratis', alreadyRaging: '¿Ya eres furioso?',
     continueTwitter: '𝕏 CONTINUAR CON TWITTER',
     streamError: "Algo se rompió de mi lado. Dificultades técnicas, acorde con el tema de tu día. Inténtalo de nuevo.",
+    scoreInfoTitle: '🔥 CÓMO RAGEAR MÁS FUERTE',
+    scoreInfoSubtitle: 'Tu puntuación se calcula en tiempo real. Así puedes maximizarla.',
+    scoreBaseTitle: 'PUNTOS BASE (por mensaje)',
+    scoreTopicTitle: 'MULTIPLICADORES DE TEMA',
+    scoreBonusTitle: 'BONIFICACIONES',
+    scoreInfoFooter: 'Los multiplicadores se acumulan. Un rant corto, en MAYÚSCULAS, con palabrotas sobre tu suegra a las 2am — gritando al micro — vale más que una novela.',
     rankMsgTop: (r) => `Top ${r}. Impresionante o preocupante. Posiblemente ambos.`,
     rankMsgRest: (r) => `Posición #${r}. Tu rabia ha sido inmortalizada.`,
     welcomeUser: (u) => `Bienvenido, ${u}. Vamos a enfadarnos.`,
@@ -1335,6 +1686,12 @@ const TRANSLATIONS = {
     signUpFree: 'הירשם בחינם', alreadyRaging: 'כבר כועס?',
     continueTwitter: '𝕏 המשך עם Twitter',
     streamError: "משהו נשבר אצלי. קשיים טכניים, בהתאם לנושא של היום שלך. נסה שוב.",
+    scoreInfoTitle: '🔥 איך לכעוס יותר חזק',
+    scoreInfoSubtitle: 'הניקוד שלך מחושב בזמן אמת. ככה תמקסם אותו.',
+    scoreBaseTitle: 'נקודות בסיס (להודעה)',
+    scoreTopicTitle: 'מכפילי נושא',
+    scoreBonusTitle: 'בונוסים',
+    scoreInfoFooter: 'המכפילים מצטברים. ראנט קצר, באותיות גדולות, עם קללות על חמותך בשתיים בלילה — בצעקה לתוך המיקרופון — שווה יותר מרומן שלם.',
     rankMsgTop: (r) => `מקום ${r}. מרשים או מדאיג. אולי שניהם.`,
     rankMsgRest: (r) => `מקום #${r}. הזעם שלך הונצח.`,
     welcomeUser: (u) => `ברוך הבא, ${u}. בוא נכעס.`,
@@ -1352,7 +1709,10 @@ const App = {
   ttsEnabled: false,
   recognition: null,
   isRecording: false,
+  lastUsedMic: false,
   lang: 'en',
+  quoteIndex: 0,
+  quoteTimer: null,
 
   // ── i18n ───────────────────────────────────────────
   t(key) {
@@ -1416,6 +1776,7 @@ const App = {
     this.autoResize();
     this.checkSpeechSupport();
     this.initAuth();
+    this.initCarousel();
     this.showWelcome();
   },
 
@@ -1558,14 +1919,33 @@ const App = {
 
   // ── Scoring ────────────────────────────────────────
   calculateScore(text) {
+    const lower = text.toLowerCase();
     const words = text.trim().split(/\s+/).length;
     const caps = (text.match(/[A-Z]{3,}/g) || []).length;
     const bangs = (text.match(/!/g) || []).length;
     const questions = (text.match(/\?/g) || []).length;
-    const curseMult = /\b(fuck|shit|damn|hell|bullshit|ass|bitch|crap|bastard)\b/i.test(text) ? 1.5 : 1;
 
-    let pts = Math.round((words * 3 + caps * 15 + bangs * 5 + questions * 3) * curseMult);
-    pts = Math.max(pts, words * 2); // minimum pts
+    // Profanity multiplier
+    const curseMult = /\b(fuck|shit|damn|hell|bullshit|ass|bitch|crap|bastard|wtf|screw)\b/i.test(text) ? 1.5 : 1;
+
+    // Intensity keyword bonus
+    const intensity = (text.match(/\b(hate|never|always|worst|pathetic|unbelievable|ridiculous|outrageous|disgusting|furious|livid|raging|insane|unbearable)\b/gi) || []).length;
+
+    // Topic multiplier (stackable)
+    let topicMult = 1.0;
+    if (/\b(family|mom|dad|mother|father|sister|brother|parent|child|kid|son|daughter|in-law)\b/i.test(lower)) topicMult += 0.30;
+    if (/\b(husband|wife|married|marriage|spouse|divorce)\b/i.test(lower)) topicMult += 0.25;
+    if (/\b(boyfriend|girlfriend|partner|dating|relationship|breakup|ex\b|cheated)\b/i.test(lower)) topicMult += 0.20;
+    if (/\b(money|broke|debt|bills|rent|mortgage|loan|afford|salary)\b/i.test(lower)) topicMult += 0.15;
+    if (/\b(tired|exhausted|sleep|insomnia|drained|burnout|can't sleep)\b/i.test(lower)) topicMult += 0.15;
+    if (/\b(boss|manager|coworker|colleague|workplace|office|job|work|fired|laid off)\b/i.test(lower)) topicMult += 0.10;
+
+    // Mic bonus
+    const micMult = this.lastUsedMic ? 1.2 : 1.0;
+    this.lastUsedMic = false; // reset
+
+    let pts = Math.round((words * 3 + caps * 15 + bangs * 5 + questions * 3 + intensity * 10) * curseMult * topicMult * micMult);
+    pts = Math.max(pts, words * 2);
     this.score += pts;
 
     // Rage level (0-100, asymptotic)
@@ -1689,6 +2069,53 @@ const App = {
     chat.scrollTop = chat.scrollHeight;
   },
 
+  // ── Quote carousel ─────────────────────────────────
+  initCarousel() {
+    const nav = document.getElementById('quote-nav');
+    RAGE_QUOTES.forEach((_, i) => {
+      const dot = document.createElement('div');
+      dot.className = 'quote-dot' + (i === 0 ? ' active' : '');
+      dot.onclick = () => this.showQuote(i);
+      nav.appendChild(dot);
+    });
+    this.showQuote(0);
+    this.quoteTimer = setInterval(() => {
+      this.showQuote((this.quoteIndex + 1) % RAGE_QUOTES.length);
+    }, 6000);
+  },
+
+  showQuote(i) {
+    this.quoteIndex = i;
+    const content = document.getElementById('quote-content');
+    content.classList.add('fade');
+    setTimeout(() => {
+      document.getElementById('quote-text').textContent = `"${RAGE_QUOTES[i].text}"`;
+      document.getElementById('quote-author').textContent = `— ${RAGE_QUOTES[i].author}`;
+      content.classList.remove('fade');
+    }, 350);
+    document.querySelectorAll('.quote-dot').forEach((d, idx) => {
+      d.classList.toggle('active', idx === i);
+    });
+  },
+
+  // ── Score info modal ────────────────────────────────
+  showScoreInfo() {
+    document.getElementById('score-info-modal').classList.add('open');
+  },
+
+  closeScoreInfo() {
+    document.getElementById('score-info-modal').classList.remove('open');
+  },
+
+  // ── Privacy modal ───────────────────────────────────
+  showPrivacy() {
+    document.getElementById('privacy-modal').classList.add('open');
+  },
+
+  closePrivacy() {
+    document.getElementById('privacy-modal').classList.remove('open');
+  },
+
   // ── Quick start ────────────────────────────────────
   quickVent(topicKey) {
     const topicMap = { boss: 'topicBoss', relationship: 'topicRelationship',
@@ -1739,6 +2166,7 @@ const App = {
   startRecording() {
     if (!this.recognition || this.isRecording) return;
     this.isRecording = true;
+    this.lastUsedMic = true;
     document.getElementById('mic-btn').classList.add('recording');
     document.getElementById('input').placeholder = this.t('listeningPlaceholder');
     try { this.recognition.start(); } catch (e) { this.stopRecording(); }
@@ -2036,6 +2464,13 @@ document.getElementById('submit-modal').addEventListener('click', (e) => {
 });
 document.getElementById('auth-modal').addEventListener('click', (e) => {
   if (e.target === document.getElementById('auth-modal')) App.closeAuth();
+});
+
+document.getElementById('score-info-modal').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('score-info-modal')) App.closeScoreInfo();
+});
+document.getElementById('privacy-modal').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('privacy-modal')) App.closePrivacy();
 });
 
 // Submit auth on Enter key
