@@ -377,7 +377,10 @@ app.post('/api/leaderboard', (req, res) => {
 // ─── Start ────────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`\n🔥 RAGE AGENT is live → http://localhost:${PORT}`);
+  console.log(`\n RAGE AGENT is live in http://localhost:${PORT}`);
+  if (err) {
+    console.log(err)
+  }
   console.log(`   Model: ${OLLAMA_MODEL} via ${OLLAMA_URL}`);
   console.log(`   Leaderboard entries: ${leaderboard.length}\n`);
 });
