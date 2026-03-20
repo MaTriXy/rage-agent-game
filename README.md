@@ -289,54 +289,52 @@ rage/
 
 Live at: **[rageagent.lol](https://rageagent.lol)**
 
-Requires a server with **≥4GB RAM** to run Ollama + aya. Recommended: Hetzner CX22 (€5/mo) or Oracle Cloud Always Free (4 OCPUs, 24GB RAM).
+Requires a server with **≥4GB RAM** to run Ollama + aya.
 
-### Environment variables to set in production
+### Environment variables
 
 ```env
-OLLAMA_URL=http://your-ollama-host:11434
+OLLAMA_URL=http://localhost:11434
 OLLAMA_MODEL=aya
 APP_URL=https://rageagent.lol
+PORT=3000
+
+# Optional: Twitter OAuth
 TWITTER_CLIENT_ID=...
 TWITTER_CLIENT_SECRET=...
-PORT=3000
 ```
 
-### Quick deploy (VPS)
+### Production setup (VPS)
 
 ```bash
-# 1. Clone & install
-git clone https://github.com/moranlb-dev/rage.git && cd rage && npm install
-
-# 2. Pull model
+# Install Node.js, Ollama, PM2, nginx, certbot — then:
+git clone https://github.com/moranlb-dev/rage.git && cd rage
+npm install
 ollama pull aya
-
-# 3. Start with PM2
 pm2 start server.js --name rage-agent && pm2 save
-
-# 4. nginx + SSL
-sudo certbot --nginx -d rageagent.lol -d www.rageagent.lol
-
-# 5. Future updates
-git pull && pm2 restart rage-agent
 ```
 
-### Namecheap DNS (point rageagent.lol to your server)
-
-In Namecheap → Domain List → Manage → Advanced DNS:
-
-| Type | Host | Value |
-|---|---|---|
-| A Record | `@` | `YOUR_SERVER_IP` |
-| A Record | `www` | `YOUR_SERVER_IP` |
+Deployments are automated via GitHub Actions — see [`.github/workflows/`](.github/workflows/).
 
 ### Notes
 
 - `users.json` and `leaderboard.json` are created automatically on first run
-- Token count is automatically adjusted per language: 80 tokens for English, 120 for Hebrew/Spanish (denser scripts)
-- Ollama must be accessible from the server — run it on the same host or expose it securely
-- Tokens are in-memory only — users will need to log in again after a server restart (by design for simplicity)
-- For production, consider replacing flat-file storage with a database (SQLite, Postgres)
+- Token budget adjusts per language: 80 tokens for English, 120 for Hebrew/Spanish
+- Ollama must run on the same host as the server (or be exposed securely)
+- Auth tokens are in-memory — users re-login after server restart (by design)
+- For high traffic, replace flat-file storage with SQLite or Postgres
+
+---
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full workflow.
+
+**Short version:**
+1. Fork → branch off `staging`
+2. Open a PR against `staging`
+3. Maintainer reviews + merges → auto-deploys to staging
+4. Maintainer promotes `staging` → `main` → auto-deploys to production
 
 ---
 
