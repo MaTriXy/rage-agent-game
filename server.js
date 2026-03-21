@@ -28,6 +28,17 @@ const TWITTER_CALLBACK = `${APP_URL}/auth/twitter/callback`;
 // Temp store for OAuth state (in-memory, keyed by state param)
 const oauthStates = new Map();
 
+// ─── Active sessions tracker ──────────────────────────────────────────────────
+const activeSessions = new Map(); // sessionId → lastSeen ms
+
+function getActiveCount() {
+  const cutoff = Date.now() - 5 * 60 * 1000;
+  for (const [id, ts] of activeSessions) {
+    if (ts < cutoff) activeSessions.delete(id);
+  }
+  return activeSessions.size;
+}
+
 app.use(express.json());
 app.use(express.static(join(__dirname, 'public')));
 
@@ -121,7 +132,8 @@ app.post('/api/chat', async (req, res) => {
   res.setHeader('Connection', 'keep-alive');
   res.flushHeaders();
 
-  const { messages, lang } = req.body;
+  const { messages, lang, sessionId } = req.body;
+  if (sessionId) activeSessions.set(sessionId, Date.now());
 
   if (!messages || !Array.isArray(messages)) {
     res.write(`data: ${JSON.stringify({ error: 'Invalid messages' })}\n\n`);
@@ -350,6 +362,11 @@ app.post('/api/leaderboard', (req, res) => {
 
   const rank = leaderboard.findIndex(e => e.id === entry.id) + 1;
   res.json({ ...entry, rank });
+});
+
+// ─── Active users endpoint ────────────────────────────────────────────────────
+app.get('/api/active', (req, res) => {
+  res.json({ count: getActiveCount() });
 });
 
 // ─── Deploy webhook ───────────────────────────────────────────────────────────

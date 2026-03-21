@@ -86,6 +86,30 @@
       gap: 10px;
     }
 
+    .active-counter {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 1px;
+    }
+
+    .active-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #44ff88;
+      box-shadow: 0 0 6px rgba(68,255,136,0.7);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(0.85); }
+    }
+
     .mode-badge {
       font-size: 11px;
       font-family: 'Space Mono', monospace;
@@ -991,19 +1015,20 @@
 
     /* ── Score info ─────────────────────────────────── */
     .score-info-btn {
-      background: none;
-      border: 1px solid transparent;
-      color: var(--muted);
+      background: rgba(255,107,26,0.1);
+      border: 1px solid var(--orange);
+      color: var(--orange);
       cursor: pointer;
-      font-size: 10px;
-      width: 20px;
-      height: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      width: 22px;
+      height: 22px;
       border-radius: 50%;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       font-family: 'Space Mono', monospace;
-      opacity: 0.6;
+      opacity: 0.85;
       transition: all 0.2s;
       padding: 0;
       margin-left: 4px;
@@ -1373,6 +1398,7 @@
       RAGE AGENT
     </div>
     <div class="header-right">
+      <div class="active-counter"><div class="active-dot"></div><span id="active-count">1</span> RAGING</div>
       <span id="mode-badge" class="mode-badge">WARMING UP</span>
       <div class="lang-switcher">
         <button class="lang-btn active" id="lang-en" onclick="App.setLang('en')">EN</button>
@@ -1942,6 +1968,8 @@ const App = {
 
   // ── Init ───────────────────────────────────────────
   init() {
+    this.sessionId = localStorage.getItem('rage_session') || crypto.randomUUID();
+    localStorage.setItem('rage_session', this.sessionId);
     const savedLang = localStorage.getItem('rage_lang') || 'en';
     this.setLang(savedLang);
     this.setupSpeech();
@@ -1949,10 +1977,24 @@ const App = {
     this.checkSpeechSupport();
     this.initAuth();
     this.initCarousel();
+    this.initActiveCounter();
     if (!localStorage.getItem('rage_age_ok')) {
       document.getElementById('age-gate').classList.add('open');
     }
     this.showWelcome();
+  },
+
+  initActiveCounter() {
+    this.fetchActiveCount();
+    setInterval(() => this.fetchActiveCount(), 30000);
+  },
+
+  async fetchActiveCount() {
+    try {
+      const res = await fetch('/api/active');
+      const { count } = await res.json();
+      document.getElementById('active-count').textContent = Math.max(count, 1);
+    } catch (e) {}
   },
 
   checkSpeechSupport() {
@@ -2037,7 +2079,7 @@ const App = {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: this.messages, lang: this.lang }),
+        body: JSON.stringify({ messages: this.messages, lang: this.lang, sessionId: this.sessionId }),
       });
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
