@@ -163,19 +163,13 @@ data: [DONE]
 |---|---|---|
 | `GET` | `/api/active` | Sessions active in the last 5 min |
 
-### Deploy webhook
-
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/deploy` | Pull + restart (requires `x-deploy-token` header) |
-
 ---
 
 ## Deployment
 
 ### GitHub Actions (auto-deploy)
 
-Every push to `main` triggers the deploy workflow → calls `/deploy` on the server → `git pull` + `npm install` + `pm2 restart`.
+Every push to `main` triggers the deploy workflow, which automatically updates and restarts the server.
 
 Required GitHub secret:
 
