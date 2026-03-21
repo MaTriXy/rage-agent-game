@@ -161,6 +161,31 @@ STYLE RULES — READ THIS FIRST:
 `;
 
 
+// ─── Weekly Rage Topics ───────────────────────────────────────────────────────
+const WEEKLY_TOPICS = [
+  { topic: "Rent & cost of living going through the roof", keywords: ["rent", "landlord", "housing", "mortgage", "afford", "cost", "expensive", "price"] },
+  { topic: "Coworkers who do absolutely nothing", keywords: ["coworker", "colleague", "lazy", "useless", "office", "work", "meeting", "slack", "team"] },
+  { topic: "Customer service that couldn't care less", keywords: ["support", "service", "customer", "help", "call", "waited", "hold", "ignored", "rep"] },
+  { topic: "Traffic & public transport disasters", keywords: ["traffic", "bus", "train", "metro", "commute", "late", "driver", "road", "stuck"] },
+  { topic: "Prices at the grocery store", keywords: ["grocery", "food", "supermarket", "price", "eggs", "milk", "shop", "expensive", "checkout"] },
+  { topic: "Family who doesn't understand boundaries", keywords: ["family", "mom", "dad", "parents", "mother", "father", "sister", "brother", "relative"] },
+  { topic: "Social media algorithms ruining your brain", keywords: ["social", "instagram", "tiktok", "algorithm", "feed", "post", "follower", "like", "scroll"] },
+  { topic: "Airlines treating passengers like cargo", keywords: ["airline", "flight", "delay", "airport", "seat", "baggage", "ticket", "boarding", "cancel"] },
+  { topic: "Managers who micromanage everything", keywords: ["manager", "boss", "micromanage", "meeting", "report", "deadline", "fired", "review"] },
+  { topic: "Healthcare system making you wait forever", keywords: ["doctor", "hospital", "insurance", "wait", "appointment", "health", "medical", "sick"] },
+  { topic: "Deliveries that never actually arrive", keywords: ["delivery", "package", "shipping", "late", "lost", "courier", "amazon", "order", "parcel"] },
+  { topic: "Neighbors who have zero respect", keywords: ["neighbor", "noise", "loud", "music", "parking", "building", "upstairs", "next door"] },
+];
+
+function getCurrentTopic() {
+  const weekNum = Math.floor(Date.now() / (7 * 24 * 60 * 60 * 1000));
+  return WEEKLY_TOPICS[weekNum % WEEKLY_TOPICS.length];
+}
+
+app.get('/api/topic', (req, res) => {
+  res.json(getCurrentTopic());
+});
+
 // ─── Chat endpoint (SSE streaming) ───────────────────────────────────────────
 app.post('/api/chat', async (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream');
@@ -168,7 +193,7 @@ app.post('/api/chat', async (req, res) => {
   res.setHeader('Connection', 'keep-alive');
   res.flushHeaders();
 
-  const { messages, lang, sessionId } = req.body;
+  const { messages, lang, sessionId, country, job } = req.body;
   if (sessionId) activeSessions.set(sessionId, Date.now());
 
   if (!messages || !Array.isArray(messages)) {
@@ -187,7 +212,16 @@ Como un amigo nativo que te escucha desahogarte.\n\n`,
 כמו חבר ישראלי שמקשיב לך להתפרק.\n\n`,
   };
   const langPrefix = LANG_INSTRUCTIONS[lang] || '';
-  const systemPrompt = langPrefix + SYSTEM_PROMPT;
+
+  // Build user context injection if provided
+  const ctxParts = [];
+  if (country) ctxParts.push(`Location: ${String(country).slice(0, 50)}`);
+  if (job) ctxParts.push(`Job: ${String(job).slice(0, 50)}`);
+  const contextBlock = ctxParts.length > 0
+    ? `\nUSER CONTEXT (use naturally when relevant — reference local culture, job frustrations, cost of living, politics for their country):\n${ctxParts.join('\n')}\n`
+    : '';
+
+  const systemPrompt = langPrefix + SYSTEM_PROMPT + contextBlock;
 
   try {
     const recentMessages = messages.slice(-10);
@@ -440,7 +474,7 @@ app.post('/api/verdict', async (req, res) => {
   res.setHeader('Connection', 'keep-alive');
   res.flushHeaders();
 
-  const { messages, lang } = req.body;
+  const { messages, lang, country, job } = req.body;
   if (!messages || !Array.isArray(messages)) {
     res.write(`data: ${JSON.stringify({ error: 'Invalid messages' })}\n\n`);
     return res.end();
@@ -450,7 +484,11 @@ app.post('/api/verdict', async (req, res) => {
     es: `REGLA ABSOLUTA DE IDIOMA: Responde ÚNICAMENTE en español.\n\n`,
     he: `כלל שפה מוחלט: ענה רק בעברית.\n\n`,
   };
-  const systemPrompt = (LANG_INSTRUCTIONS[lang] || '') + VERDICT_PROMPT;
+  const ctxParts = [];
+  if (country) ctxParts.push(`Location: ${String(country).slice(0, 50)}`);
+  if (job) ctxParts.push(`Job: ${String(job).slice(0, 50)}`);
+  const contextBlock = ctxParts.length > 0 ? `\nUSER CONTEXT:\n${ctxParts.join('\n')}\n` : '';
+  const systemPrompt = (LANG_INSTRUCTIONS[lang] || '') + VERDICT_PROMPT + contextBlock;
 
   try {
     const stream = await groq.chat.completions.create({

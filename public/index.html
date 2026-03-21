@@ -1701,6 +1701,97 @@
 
     #age-gate { transition: opacity 0.5s ease; }
     #age-gate.fading { opacity: 0; pointer-events: none; }
+
+    /* ── Context Setup ──────────────────────────────── */
+    #context-setup {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.97);
+      z-index: 9998;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      text-align: center;
+      padding: 40px 20px;
+      transition: opacity 0.4s ease;
+    }
+    #context-setup.open { display: flex; }
+    #context-setup.fading { opacity: 0; pointer-events: none; }
+
+    .context-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      width: 100%;
+      max-width: 340px;
+      margin: 6px 0 26px;
+    }
+    .context-field { display: flex; flex-direction: column; gap: 6px; text-align: left; }
+    .context-label {
+      font-size: 11px;
+      font-family: 'Space Mono', monospace;
+      letter-spacing: 1.5px;
+      color: var(--muted);
+    }
+    .context-input {
+      padding: 12px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 14px;
+      font-family: 'Space Grotesk', sans-serif;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .context-input:focus { border-color: var(--orange); }
+    .context-input::placeholder { color: var(--muted); opacity: 0.45; }
+
+    /* ── Weekly Topic Banner ────────────────────────── */
+    #weekly-topic {
+      display: none;
+      margin: 0 12px 10px;
+      padding: 11px 16px;
+      background: linear-gradient(135deg, rgba(255,107,26,0.07) 0%, rgba(255,46,46,0.05) 100%);
+      border: 1px solid rgba(255,107,26,0.22);
+      border-radius: 12px;
+      align-items: center;
+      gap: 10px;
+      cursor: default;
+    }
+    #weekly-topic.visible { display: flex; }
+    .topic-badge {
+      font-size: 9px;
+      font-family: 'Space Mono', monospace;
+      letter-spacing: 1.5px;
+      color: var(--orange);
+      background: rgba(255,107,26,0.1);
+      padding: 3px 8px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,107,26,0.25);
+      white-space: nowrap;
+    }
+    .topic-text {
+      flex: 1;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .topic-bonus {
+      font-size: 10px;
+      font-family: 'Space Mono', monospace;
+      color: var(--orange);
+      white-space: nowrap;
+      background: rgba(255,107,26,0.08);
+      padding: 3px 8px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,107,26,0.2);
+    }
+    @media (max-width: 480px) {
+      #weekly-topic { flex-wrap: wrap; gap: 6px; }
+      .topic-text { font-size: 12px; width: 100%; }
+    }
   </style>
 </head>
 <body>
@@ -1764,6 +1855,13 @@
       <div class="quote-author" id="quote-author"></div>
     </div>
     <div class="quote-nav" id="quote-nav"></div>
+  </div>
+
+  <!-- Weekly Rage Topic -->
+  <div id="weekly-topic">
+    <span class="topic-badge">🔥 THIS WEEK</span>
+    <span class="topic-text" id="topic-text">Loading...</span>
+    <span class="topic-bonus">2× POINTS</span>
   </div>
 
   <!-- Chat -->
@@ -1931,6 +2029,27 @@
     <button class="btn-age-no" onclick="App.rejectAge()">I'M UNDER 18</button>
   </div>
   <div class="age-gate-footer">By entering you confirm you are at least 18 years of age</div>
+</div>
+
+<!-- Context Setup -->
+<div id="context-setup">
+  <div class="age-gate-icon">🔥</div>
+  <div class="age-gate-title">BRIEF ME</div>
+  <div class="age-gate-subtitle">Help RAGE get personal. Two quick questions — both optional.</div>
+  <div class="context-fields">
+    <div class="context-field">
+      <label class="context-label">🌍 WHERE ARE YOU RAGING FROM?</label>
+      <input class="context-input" type="text" id="ctx-country" placeholder="Country, city..." autocomplete="off" maxlength="50" />
+    </div>
+    <div class="context-field">
+      <label class="context-label">💼 WHAT DO YOU DO?</label>
+      <input class="context-input" type="text" id="ctx-job" placeholder="Job title, student, parent..." autocomplete="off" maxlength="50" />
+    </div>
+  </div>
+  <div class="age-gate-actions">
+    <button class="btn-age-yes" onclick="App.confirmContext()">LET'S RAGE →</button>
+    <button class="btn-age-no" onclick="App.skipContext()">skip — just start raging</button>
+  </div>
 </div>
 
 <!-- Score info modal -->
@@ -2310,6 +2429,9 @@ const App = {
   init() {
     this.sessionId = localStorage.getItem('rage_session') || crypto.randomUUID();
     localStorage.setItem('rage_session', this.sessionId);
+    this.country = localStorage.getItem('rage_country') || '';
+    this.job = localStorage.getItem('rage_job') || '';
+    this.weeklyTopicKeywords = [];
     const savedLang = localStorage.getItem('rage_lang') || 'en';
     this.setLang(savedLang);
     this.setupSpeech();
@@ -2318,10 +2440,25 @@ const App = {
     this.initAuth();
     this.initCarousel();
     this.initActiveCounter();
+    this.initTopic();
     if (!localStorage.getItem('rage_age_ok')) {
       document.getElementById('age-gate').classList.add('open');
+    } else if (!localStorage.getItem('rage_context_ok')) {
+      document.getElementById('context-setup').classList.add('open');
     }
     this.showWelcome();
+  },
+
+  async initTopic() {
+    try {
+      const res = await fetch('/api/topic');
+      const { topic, keywords } = await res.json();
+      if (topic) {
+        document.getElementById('topic-text').textContent = topic;
+        document.getElementById('weekly-topic').classList.add('visible');
+        this.weeklyTopicKeywords = keywords || [];
+      }
+    } catch (e) {}
   },
 
   initActiveCounter() {
@@ -2419,7 +2556,7 @@ const App = {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: this.messages, lang: this.lang, sessionId: this.sessionId }),
+        body: JSON.stringify({ messages: this.messages, lang: this.lang, sessionId: this.sessionId, country: this.country, job: this.job }),
       });
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -2512,11 +2649,16 @@ const App = {
     if (/\b(tired|exhausted|sleep|insomnia|drained|burnout|can't sleep)\b/i.test(lower)) topicMult += 0.15;
     if (/\b(boss|manager|coworker|colleague|workplace|office|job|work|fired|laid off)\b/i.test(lower)) topicMult += 0.10;
 
+    // Weekly topic bonus — 2x if message hits the topic
+    const weeklyBonus = (this.weeklyTopicKeywords.length > 0 &&
+      this.weeklyTopicKeywords.some(kw => lower.includes(kw.toLowerCase()))) ? 2.0 : 1.0;
+    if (weeklyBonus > 1) this.toast('🔥 WEEKLY TOPIC BONUS — 2× POINTS!');
+
     // Mic bonus
     const micMult = this.lastUsedMic ? 1.2 : 1.0;
     this.lastUsedMic = false; // reset
 
-    let pts = Math.round((words * 3 + caps * 15 + bangs * 5 + questions * 3 + intensity * 10) * curseMult * topicMult * micMult);
+    let pts = Math.round((words * 3 + caps * 15 + bangs * 5 + questions * 3 + intensity * 10) * curseMult * topicMult * weeklyBonus * micMult);
     pts = Math.max(pts, words * 2);
     this.score += pts;
 
@@ -3032,7 +3174,34 @@ const App = {
     localStorage.setItem('rage_age_ok', '1');
     const gate = document.getElementById('age-gate');
     gate.classList.add('fading');
-    setTimeout(() => { gate.classList.remove('open'); gate.classList.remove('fading'); }, 500);
+    setTimeout(() => {
+      gate.classList.remove('open');
+      gate.classList.remove('fading');
+      // Show context setup if not done yet
+      if (!localStorage.getItem('rage_context_ok')) {
+        document.getElementById('context-setup').classList.add('open');
+      }
+    }, 500);
+  },
+
+  confirmContext() {
+    const country = (document.getElementById('ctx-country').value || '').trim();
+    const job = (document.getElementById('ctx-job').value || '').trim();
+    this.country = country;
+    this.job = job;
+    if (country) localStorage.setItem('rage_country', country);
+    if (job) localStorage.setItem('rage_job', job);
+    localStorage.setItem('rage_context_ok', '1');
+    const setup = document.getElementById('context-setup');
+    setup.classList.add('fading');
+    setTimeout(() => { setup.classList.remove('open'); setup.classList.remove('fading'); }, 400);
+  },
+
+  skipContext() {
+    localStorage.setItem('rage_context_ok', '1');
+    const setup = document.getElementById('context-setup');
+    setup.classList.add('fading');
+    setTimeout(() => { setup.classList.remove('open'); setup.classList.remove('fading'); }, 400);
   },
 
   rejectAge() {
@@ -3064,7 +3233,7 @@ const App = {
       const resp = await fetch('/api/verdict', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: this.messages, lang: this.lang }),
+        body: JSON.stringify({ messages: this.messages, lang: this.lang, country: this.country, job: this.job }),
       });
 
       const reader = resp.body.getReader();
