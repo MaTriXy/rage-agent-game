@@ -66,6 +66,30 @@ function saveLeaderboard(data) {
 
 let leaderboard = loadLeaderboard();
 
+// ─── Rants persistence ────────────────────────────────────────────────────────
+const RANTS_FILE = join(__dirname, 'rants.json');
+
+function loadRants() {
+  try {
+    if (fs.existsSync(RANTS_FILE)) {
+      return JSON.parse(fs.readFileSync(RANTS_FILE, 'utf-8'));
+    }
+  } catch (e) {
+    console.error('Failed to load rants:', e.message);
+  }
+  return [];
+}
+
+function saveRants(data) {
+  try {
+    fs.writeFileSync(RANTS_FILE, JSON.stringify(data, null, 2));
+  } catch (e) {
+    console.error('Failed to save rants:', e.message);
+  }
+}
+
+let rants = loadRants();
+
 // ─── User auth persistence ─────────────────────────────────────────────────
 const USERS_FILE = join(__dirname, 'users.json');
 
@@ -167,6 +191,7 @@ Como un amigo nativo que te escucha desahogarte.\n\n`,
       ],
     });
 
+    let fullText = '';
     for await (const chunk of stream) {
       let text = chunk.choices[0]?.delta?.content || '';
       if (text) {
@@ -174,8 +199,16 @@ Como un amigo nativo que te escucha desahogarte.\n\n`,
           .replace(/\*\*([^*]+)\*\*/g, '$1')
           .replace(/\*([^*]+)\*/g, '$1')
           .replace(/^[\n\r]+/, '');
+        fullText += text;
         res.write(`data: ${JSON.stringify({ text })}\n\n`);
       }
+    }
+
+    // Save to community rants if substantial enough
+    if (fullText.length >= 30) {
+      rants.push({ text: fullText, date: Date.now() });
+      if (rants.length > 300) rants = rants.sort((a, b) => b.date - a.date).slice(0, 300);
+      saveRants(rants);
     }
 
     res.write('data: [DONE]\n\n');
@@ -367,6 +400,76 @@ app.post('/api/leaderboard', (req, res) => {
 // ─── Active users endpoint ────────────────────────────────────────────────────
 app.get('/api/active', (req, res) => {
   res.json({ count: getActiveCount() });
+});
+
+// ─── Community rants endpoint ─────────────────────────────────────────────────
+app.get('/api/rants', (req, res) => {
+  if (rants.length === 0) return res.json([]);
+  const shuffled = [...rants].sort(() => Math.random() - 0.5).slice(0, 15);
+  res.json(shuffled.map(r => ({ text: r.text })));
+});
+
+// ─── Verdict endpoint ─────────────────────────────────────────────────────────
+const VERDICT_PROMPT = `You are RAGE, and you've heard the whole story. Now deliver your VERDICT.
+
+RULES:
+- This is your final, definitive judgment — 3 sentences maximum
+- MORE theatrical and dramatic than your normal responses — this is your closing argument
+- Like a furious judge who has heard ENOUGH
+- Still 100% on their side, with the gravity of someone who has seen it all
+- End with a definitive statement, not a question — this is a VERDICT, not a conversation
+- No markdown. Plain text only.
+- ALL CAPS sparingly for maximum impact
+- No "I understand". No therapy-speak. Pure RAGE with finality.`;
+
+app.post('/api/verdict', async (req, res) => {
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders();
+
+  const { messages, lang } = req.body;
+  if (!messages || !Array.isArray(messages)) {
+    res.write(`data: ${JSON.stringify({ error: 'Invalid messages' })}\n\n`);
+    return res.end();
+  }
+
+  const LANG_INSTRUCTIONS = {
+    es: `REGLA ABSOLUTA DE IDIOMA: Responde ÚNICAMENTE en español.\n\n`,
+    he: `כלל שפה מוחלט: ענה רק בעברית.\n\n`,
+  };
+  const systemPrompt = (LANG_INSTRUCTIONS[lang] || '') + VERDICT_PROMPT;
+
+  try {
+    const stream = await groq.chat.completions.create({
+      model: GROQ_MODEL,
+      stream: true,
+      temperature: 0.9,
+      max_tokens: lang === 'en' ? 150 : 200,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        ...messages.slice(-10),
+        { role: 'user', content: 'Give me your final verdict on all of this.' },
+      ],
+    });
+
+    for await (const chunk of stream) {
+      let text = chunk.choices[0]?.delta?.content || '';
+      if (text) {
+        text = text
+          .replace(/\*\*([^*]+)\*\*/g, '$1')
+          .replace(/\*([^*]+)\*/g, '$1')
+          .replace(/^[\n\r]+/, '');
+        res.write(`data: ${JSON.stringify({ text })}\n\n`);
+      }
+    }
+    res.write('data: [DONE]\n\n');
+    res.end();
+  } catch (err) {
+    console.error('Verdict error:', err.message);
+    res.write(`data: ${JSON.stringify({ error: err.message })}\n\n`);
+    res.end();
+  }
 });
 
 // ─── Deploy webhook ───────────────────────────────────────────────────────────

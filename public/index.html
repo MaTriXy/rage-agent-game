@@ -163,6 +163,132 @@
       border-color: #fff;
     }
 
+    /* ── Verdict ───────────────────────────────────────── */
+    #verdict-wrap {
+      display: none;
+      padding: 6px 16px 0;
+      text-align: center;
+    }
+
+    .verdict-btn {
+      background: linear-gradient(135deg, rgba(255,200,0,0.1), rgba(255,107,26,0.1));
+      border: 1px solid #ffc800;
+      color: #ffc800;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      padding: 8px 22px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      animation: verdict-pulse 2.5s ease-in-out infinite;
+    }
+    .verdict-btn:hover {
+      background: linear-gradient(135deg, rgba(255,200,0,0.22), rgba(255,107,26,0.22));
+      color: #fff;
+    }
+    .verdict-btn:disabled { opacity: 0.5; cursor: not-allowed; animation: none; }
+    @keyframes verdict-pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(255,200,0,0.25); }
+      50% { box-shadow: 0 0 14px 4px rgba(255,200,0,0.1); }
+    }
+
+    .verdict-card {
+      margin: 10px 16px 4px;
+      padding: 16px 20px;
+      background: linear-gradient(135deg, rgba(255,200,0,0.06), rgba(255,107,26,0.06));
+      border: 1px solid rgba(255,200,0,0.3);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      line-height: 1.65;
+      color: var(--text);
+    }
+    .verdict-card-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.14em;
+      color: #ffc800;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    /* ── Community Rants modal ─────────────────────────── */
+    #rants-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+    #rants-modal.open { display: flex; }
+
+    .rants-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      width: min(520px, 92vw);
+      max-height: 78vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .rants-header {
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .rants-title {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--red);
+      letter-spacing: 0.05em;
+    }
+    .rants-subtitle {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+    .rants-close {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 1.3rem;
+      cursor: pointer;
+      line-height: 1;
+      padding: 4px;
+    }
+    .rants-close:hover { color: var(--text); }
+    .rants-feed {
+      overflow-y: auto;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .rant-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--red);
+      border-radius: 6px;
+      padding: 12px 14px;
+      font-size: 0.88rem;
+      line-height: 1.6;
+      color: var(--text);
+    }
+    .rants-empty {
+      padding: 40px;
+      text-align: center;
+      color: var(--muted);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.78rem;
+    }
+
     /* ── Score banner ──────────────────────────────── */
     #score-banner {
       display: flex;
@@ -1431,6 +1557,7 @@
       <button id="auth-btn" onclick="App.showAuth()">LOG IN</button>
       <button class="btn-icon" id="tts-btn" title="Toggle voice" onclick="App.toggleTTS()">🔇</button>
       <button class="btn-icon" title="New session" onclick="App.newSession()">🔄</button>
+      <button class="btn-icon" title="Community Rants" onclick="App.showCommunityRants()">📣</button>
       <a href="https://github.com/moranlb-dev/rage" target="_blank" rel="noopener" class="github-link">⭐ Open Source</a>
     </div>
   </header>
@@ -1494,6 +1621,11 @@
     <button class="quick-btn" data-topic="everything" onclick="App.quickVent('everything')" data-i18n="quickEverything">🌍 EVERYTHING</button>
   </div>
 
+  <!-- Verdict -->
+  <div id="verdict-wrap">
+    <button class="verdict-btn" id="verdict-btn" onclick="App.getVerdict()">⚖️ GET RAGE'S VERDICT</button>
+  </div>
+
   <!-- Input -->
   <div id="input-area">
     <div class="input-row">
@@ -1506,6 +1638,22 @@
         data-i18n-placeholder="inputPlaceholder"
       ></textarea>
       <button id="send-btn" onclick="App.send()" data-i18n="send">SEND</button>
+    </div>
+  </div>
+
+  <!-- Community Rants Modal -->
+  <div id="rants-modal">
+    <div class="rants-panel">
+      <div class="rants-header">
+        <div>
+          <div class="rants-title">📣 COMMUNITY RANTS</div>
+          <div class="rants-subtitle">What RAGE told other people today</div>
+        </div>
+        <button class="rants-close" onclick="App.closeRants()">✕</button>
+      </div>
+      <div class="rants-feed" id="rants-feed">
+        <div class="rants-empty">Loading rants...</div>
+      </div>
     </div>
   </div>
 
@@ -2144,6 +2292,11 @@ const App = {
       if (this.ttsEnabled && full) this.speak(full);
       if (full) this.attachTweetBtn(bubble.parentElement, bubble);
 
+      // Show verdict button after 6 messages
+      if (this.msgCount >= 6) {
+        document.getElementById('verdict-wrap').style.display = 'block';
+      }
+
       // Offer leaderboard submit after 8+ messages
       if (this.msgCount >= 8 && this.msgCount % 8 === 0) {
         this.offerSubmit();
@@ -2708,6 +2861,87 @@ const App = {
     window.location.href = 'https://www.google.com';
   },
 
+  // ── RAGE's Verdict ──────────────────────────────────
+  async getVerdict() {
+    const btn = document.getElementById('verdict-btn');
+    btn.disabled = true;
+    btn.textContent = '⚖️ DELIBERATING...';
+
+    // Remove any previous verdict card
+    document.querySelectorAll('.verdict-card').forEach(el => el.remove());
+
+    // Insert verdict card above input
+    const card = document.createElement('div');
+    card.className = 'verdict-card';
+    const label = document.createElement('div');
+    label.className = 'verdict-card-label';
+    label.textContent = '⚖️ RAGE\'S VERDICT';
+    card.appendChild(label);
+    const body = document.createElement('div');
+    card.appendChild(body);
+    const verdictWrap = document.getElementById('verdict-wrap');
+    verdictWrap.parentNode.insertBefore(card, verdictWrap);
+
+    try {
+      const resp = await fetch('/api/verdict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: this.messages, lang: this.lang }),
+      });
+
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let full = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const lines = decoder.decode(value).split('\n');
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          const data = line.slice(6).trim();
+          if (data === '[DONE]') break;
+          try {
+            const { text, error } = JSON.parse(data);
+            if (error) throw new Error(error);
+            if (text) { full += text; body.textContent = full; }
+          } catch (e) {}
+        }
+      }
+
+      document.getElementById('verdict-wrap').style.display = 'none';
+      if (this.ttsEnabled && full) this.speak(full);
+    } catch (err) {
+      body.textContent = 'The jury is still deliberating. Try again.';
+      btn.disabled = false;
+      btn.textContent = '⚖️ GET RAGE\'S VERDICT';
+    }
+  },
+
+  // ── Community Rants ─────────────────────────────────
+  async showCommunityRants() {
+    const modal = document.getElementById('rants-modal');
+    const feed = document.getElementById('rants-feed');
+    modal.classList.add('open');
+    feed.innerHTML = '<div class="rants-empty">Loading rants...</div>';
+
+    try {
+      const resp = await fetch('/api/rants');
+      const data = await resp.json();
+      if (!data.length) {
+        feed.innerHTML = '<div class="rants-empty">No rants yet. Be the first to rage! 🔥</div>';
+        return;
+      }
+      feed.innerHTML = data.map(r => `<div class="rant-card">${this.esc(r.text)}</div>`).join('');
+    } catch (e) {
+      feed.innerHTML = '<div class="rants-empty">Failed to load rants.</div>';
+    }
+  },
+
+  closeRants() {
+    document.getElementById('rants-modal').classList.remove('open');
+  },
+
   // ── New session ─────────────────────────────────────
   newSession() {
     this.messages = [];
@@ -2726,6 +2960,11 @@ const App = {
     while (chat.firstChild && chat.firstChild !== typing) {
       chat.removeChild(chat.firstChild);
     }
+    document.getElementById('verdict-wrap').style.display = 'none';
+    const vBtn = document.getElementById('verdict-btn');
+    vBtn.disabled = false;
+    vBtn.textContent = '⚖️ GET RAGE\'S VERDICT';
+    document.querySelectorAll('.verdict-card').forEach(el => el.remove());
     this.showWelcome();
     this.toast('New session started 🔥');
   },
@@ -2759,6 +2998,9 @@ document.getElementById('auth-modal').addEventListener('click', (e) => {
 
 document.getElementById('score-info-modal').addEventListener('click', (e) => {
   if (e.target === document.getElementById('score-info-modal')) App.closeScoreInfo();
+});
+document.getElementById('rants-modal').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('rants-modal')) App.closeRants();
 });
 document.getElementById('privacy-modal').addEventListener('click', (e) => {
   if (e.target === document.getElementById('privacy-modal')) App.closePrivacy();
