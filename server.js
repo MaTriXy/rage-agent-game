@@ -3,6 +3,7 @@ rage (rage agent) - created by githun.com/morandev
 
 */
 
+import 'dotenv/config';
 import express from 'express';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -10,12 +11,13 @@ import fs from 'fs';
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import { TwitterApi } from 'twitter-api-v2';
+import Groq from 'groq-sdk';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
 
-const OLLAMA_URL = process.env.OLLAMA_URL || 'http://localhost:11434';
-const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'aya';
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
 
 const TWITTER_CLIENT_ID = process.env.TWITTER_CLIENT_ID || '';
 const TWITTER_CLIENT_SECRET = process.env.TWITTER_CLIENT_SECRET || '';
@@ -139,66 +141,33 @@ Como un amigo nativo que te escucha desahogarte.\n\n`,
   const systemPrompt = langPrefix + SYSTEM_PROMPT;
 
   try {
-    const ollamaRes = await fetch(`${OLLAMA_URL}/api/chat`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: OLLAMA_MODEL,
-        stream: true,
-        options: {
-          num_predict: lang === 'en' ? 80 : 120, // non-Latin scripts need more tokens for same word count
-          temperature: 0.85,
-        },
-        messages: [
-          { role: 'system', content: systemPrompt },
-          ...messages,
-        ],
-      }),
+    const stream = await groq.chat.completions.create({
+      model: GROQ_MODEL,
+      stream: true,
+      temperature: 0.85,
+      max_tokens: lang === 'en' ? 80 : 120,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        ...messages,
+      ],
     });
 
-    if (!ollamaRes.ok) {
-      const err = await ollamaRes.text();
-      res.write(`data: ${JSON.stringify({ error: `Ollama error: ${err}` })}\n\n`);
-      return res.end();
-    }
-
-    const reader = ollamaRes.body.getReader();
-    const dec = new TextDecoder();
-    let buf = '';
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      buf += dec.decode(value, { stream: true });
-      const lines = buf.split('\n');
-      buf = lines.pop();
-
-      for (const line of lines) {
-        if (!line.trim()) continue;
-        try {
-          const json = JSON.parse(line);
-          let text = json?.message?.content;
-          if (text) {
-            // Strip markdown formatting the model occasionally produces
-            text = text
-              .replace(/\*\*([^*]+)\*\*/g, '$1')
-              .replace(/\*([^*]+)\*/g, '$1')
-              .replace(/^[\n\r]+/, ''); // strip leading newlines
-            res.write(`data: ${JSON.stringify({ text })}\n\n`);
-          }
-        } catch (e) {}
+    for await (const chunk of stream) {
+      let text = chunk.choices[0]?.delta?.content || '';
+      if (text) {
+        text = text
+          .replace(/\*\*([^*]+)\*\*/g, '$1')
+          .replace(/\*([^*]+)\*/g, '$1')
+          .replace(/^[\n\r]+/, '');
+        res.write(`data: ${JSON.stringify({ text })}\n\n`);
       }
     }
 
     res.write('data: [DONE]\n\n');
     res.end();
   } catch (err) {
-    console.error('Ollama error:', err.message);
-    const msg = err.message.includes('ECONNREFUSED')
-      ? 'Ollama is not running. Start it with: ollama serve'
-      : err.message;
-    res.write(`data: ${JSON.stringify({ error: msg })}\n\n`);
+    console.error('Groq error:', err.message);
+    res.write(`data: ${JSON.stringify({ error: err.message })}\n\n`);
     res.end();
   }
 });
