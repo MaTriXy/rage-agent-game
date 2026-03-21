@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>RAGE AGENT — rageagent.lol</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -40,6 +42,7 @@
       display: flex;
       flex-direction: column;
       height: 100vh;
+      height: 100dvh; /* dynamic viewport — fixes mobile browser chrome clipping */
       max-width: 900px;
       margin: 0 auto;
     }
@@ -50,6 +53,9 @@
       align-items: center;
       justify-content: space-between;
       padding: 14px 20px;
+      padding-top: max(14px, env(safe-area-inset-top));
+      padding-left: max(20px, env(safe-area-inset-left));
+      padding-right: max(20px, env(safe-area-inset-right));
       border-bottom: 1px solid var(--border);
       background: var(--bg);
       flex-shrink: 0;
@@ -564,6 +570,7 @@
     /* ── Input area ────────────────────────────────── */
     #input-area {
       padding: 14px 20px 18px;
+      padding-bottom: max(18px, env(safe-area-inset-bottom));
       border-top: 1px solid var(--border);
       flex-shrink: 0;
     }
@@ -1142,13 +1149,92 @@
 
     /* ── Responsive ────────────────────────────────── */
     @media (max-width: 600px) {
-      .rage-meter { display: none; }
-      .score-info { gap: 12px; }
-      .logo { font-size: 15px; letter-spacing: 3px; }
-      .github-link { display: none; }
+      /* Header */
+      header { padding: 10px 14px; padding-top: max(10px, env(safe-area-inset-top)); }
+      .header-right { gap: 5px; }
+      .logo { font-size: 15px; letter-spacing: 2px; }
+      .logo-flame { font-size: 20px; }
+
+      /* Hide mode badge — rage bar already shows this */
+      .mode-badge { display: none; }
+
+      /* GitHub link — icon only, no text */
+      .github-link { padding: 6px 8px; font-size: 0; }
+      .github-link::before { content: '⭐'; font-size: 16px; }
+
+      /* Active counter — hide label, keep number */
       .active-counter span:not(#active-count) { display: none; }
-      header { padding: 10px 14px; }
-      .header-right { gap: 6px; }
+      .active-counter { gap: 4px; }
+
+      /* Lang switcher — more compact */
+      .lang-btn { padding: 5px 7px; font-size: 11px; }
+
+      /* Icon group touch targets — bigger */
+      .icon-group .btn-icon { padding: 9px 11px; font-size: 17px; }
+
+      /* Auth button */
+      #auth-btn { padding: 6px 10px; font-size: 11px; }
+
+      /* Score banner */
+      #score-banner { padding: 6px 14px; }
+      .score-val { font-size: 18px; }
+      .score-label { font-size: 9px; }
+      .rage-meter { display: none; }
+
+      /* Quote carousel — hide on mobile to save space */
+      #quote-carousel { display: none; }
+
+      /* Chat */
+      #chat-area { padding: 12px 12px; gap: 12px; }
+      .message { max-width: 92%; }
+      .bubble { font-size: 14px; padding: 10px 13px; }
+      .avatar { width: 30px; height: 30px; font-size: 16px; }
+
+      /* Quick starts */
+      #quick-starts { padding: 8px 12px 0; gap: 6px; }
+      .quick-btn { font-size: 11px; padding: 6px 10px; }
+
+      /* Verdict */
+      #verdict-wrap { padding: 6px 12px 0; }
+      .verdict-btn { width: 100%; padding: 12px; font-size: 0.72rem; }
+      .verdict-card { margin: 8px 12px 4px; }
+
+      /* Input */
+      #input-area { padding: 10px 12px; padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+      #input { font-size: 16px; } /* prevents iOS auto-zoom on focus */
+      #mic-btn { width: 44px; height: 44px; }
+      #send-btn { height: 44px; padding: 0 16px; font-size: 12px; }
+
+      /* Footer */
+      #app-footer { display: none; }
+
+      /* Toast */
+      #toast { bottom: 70px; font-size: 12px; }
+
+      /* Modals → bottom sheets */
+      #lb-modal,
+      #auth-modal,
+      #rants-modal,
+      #submit-modal,
+      #score-info-modal,
+      #privacy-modal {
+        align-items: flex-end;
+        padding: 0;
+      }
+      .lb-panel,
+      .auth-panel,
+      .rants-panel,
+      .submit-panel,
+      .score-info-panel,
+      .privacy-panel {
+        border-radius: 20px 20px 0 0;
+        max-width: 100%;
+        max-height: 88vh;
+        width: 100%;
+        padding-bottom: env(safe-area-inset-bottom);
+      }
+      .submit-panel { padding: 22px 22px 0; }
+      .auth-panel { padding: 22px 22px 0; }
     }
 
     /* ── Quote carousel ────────────────────────────── */
