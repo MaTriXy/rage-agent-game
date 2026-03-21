@@ -196,23 +196,6 @@ pm2 start server.js --name rage-agent && pm2 startup && pm2 save
 sudo certbot --nginx -d rageagent.lol -d www.rageagent.lol
 ```
 
-### nginx config
-
-```nginx
-server {
-    listen 80;
-    server_name rageagent.lol www.rageagent.lol;
-    location / {
-        proxy_pass http://localhost:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_buffering off;
-    }
-}
-```
-
 ### Notes
 
 - No GPU required — Groq handles inference in the cloud
