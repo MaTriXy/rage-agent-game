@@ -11,7 +11,6 @@ import fs from 'fs';
 import crypto from 'crypto';
 import { exec } from 'child_process';
 import bcrypt from 'bcryptjs';
-import { TwitterApi } from 'twitter-api-v2';
 import Groq from 'groq-sdk';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -19,14 +18,6 @@ const app = express();
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.1-8b-instant';
-
-const TWITTER_CLIENT_ID = process.env.TWITTER_CLIENT_ID || '';
-const TWITTER_CLIENT_SECRET = process.env.TWITTER_CLIENT_SECRET || '';
-const APP_URL = process.env.APP_URL || 'http://localhost:3000';
-const TWITTER_CALLBACK = `${APP_URL}/auth/twitter/callback`;
-
-// Temp store for OAuth state (in-memory, keyed by state param)
-const oauthStates = new Map();
 
 // ─── Active sessions tracker ──────────────────────────────────────────────────
 const activeSessions = new Map(); // sessionId → lastSeen ms
@@ -317,85 +308,6 @@ app.get('/api/me', (req, res) => {
   res.json({ username: tokens.get(token) });
 });
 
-// ─── Twitter OAuth endpoints ──────────────────────────────────────────────────
-app.get('/auth/twitter', async (req, res) => {
-  if (!TWITTER_CLIENT_ID || !TWITTER_CLIENT_SECRET) {
-    return res.redirect('/?error=twitter_not_configured');
-  };
-
-  try {
-    const client = new TwitterApi({
-      clientId: TWITTER_CLIENT_ID,
-      clientSecret: TWITTER_CLIENT_SECRET,
-  });
-
-    const { url, codeVerifier, state } = client.generateOAuth2AuthLink(TWITTER_CALLBACK, {
-      scope: ['tweet.read', 'users.read'],
-    });
-
-
-    oauthStates.set(state, { codeVerifier, createdAt: Date.now() });
-    // Clean up stale states (older than 10 min)
-    for (const [k, v] of oauthStates) {
-      if (Date.now() - v.createdAt > 600_000) oauthStates.delete(k);
-    };
-
-    res.redirect(url);
-  } catch (err) {
-    console.error('Twitter OAuth init error:', err.message);
-    res.redirect('/?error=twitter_error');
-  };
-});
-
-app.get('/auth/twitter/callback', async (req, res) => {
-  const { state, code } = req.query;
-
-  if (!state || !code || !oauthStates.has(state)) {
-    return res.redirect('/?error=twitter_invalid_state');
-  }
-
-  const { codeVerifier } = oauthStates.get(state);
-  oauthStates.delete(state);
-
-  try {
-    const client = new TwitterApi({
-      clientId: TWITTER_CLIENT_ID,
-      clientSecret: TWITTER_CLIENT_SECRET,
-    });
-
-    const { client: authedClient } = await client.loginWithOAuth2({
-      code,
-      codeVerifier,
-      redirectUri: TWITTER_CALLBACK,
-    });
-    const { data: twitterUser } = await authedClient.v2.me();
-    const twitterUsername = twitterUser.username;
-    const displayName = `@${twitterUsername}`;
-
-    // Find or create user by twitter id
-    let user = users.find(u => u.twitterId === twitterUser.id);
-    if (!user) {
-      user = {
-        id: Date.now(),
-        username: displayName,
-        twitterId: twitterUser.id,
-        twitterUsername,
-        passwordHash: null, // Twitter-only account
-      };
-      users.push(user);
-      saveUsers(users);
-    };
-
-    const token = crypto.randomBytes(32).toString('hex');
-    tokens.set(token, user.username);
-
-    // Redirect back to app with token in fragment (never in query string)
-    res.redirect(`/?twitter_auth=${token}&twitter_user=${encodeURIComponent(user.username)}`);
-  } catch (err) {
-    console.error('Twitter OAuth callback error:', err.message);
-    res.redirect('/?error=twitter_error');
-  };
-});
 // ─── Leaderboard endpoints ────────────────────────────────────────────────────
 app.get('/api/leaderboard', (req, res) => {
   const sorted = [...leaderboard]
@@ -510,84 +422,6 @@ app.post('/api/verdict', async (req, res) => {
   }
 });
 
-// ─── Twitter Bot ──────────────────────────────────────────────────────────────
-const TWITTER_APP_KEY    = process.env.TWITTER_APP_KEY    || '';
-const TWITTER_APP_SECRET = process.env.TWITTER_APP_SECRET || '';
-const TWITTER_ACCESS_TOKEN  = process.env.TWITTER_ACCESS_TOKEN  || '';
-const TWITTER_ACCESS_SECRET = process.env.TWITTER_ACCESS_SECRET || '';
-
-function getTwitterBotClient() {
-  if (!TWITTER_APP_KEY || !TWITTER_APP_SECRET || !TWITTER_ACCESS_TOKEN || !TWITTER_ACCESS_SECRET) return null;
-  return new TwitterApi({
-    appKey: TWITTER_APP_KEY,
-    appSecret: TWITTER_APP_SECRET,
-    accessToken: TWITTER_ACCESS_TOKEN,
-    accessSecret: TWITTER_ACCESS_SECRET,
-  });
-}
-
-async function generateTweetText(prompt) {
-  const res = await groq.chat.completions.create({
-    model: GROQ_MODEL,
-    temperature: 0.95,
-    max_tokens: 90,
-    messages: [{ role: 'user', content: prompt }],
-  });
-  return (res.choices[0]?.message?.content || '').trim();
-}
-
-async function postDailyTopicTweet() {
-  const client = getTwitterBotClient();
-  if (!client) return;
-  const { topic } = getCurrentTopic();
-  const prompt = `You are RAGE (@therageagent), a darkly funny AI anger companion. This week's community rage topic is: "${topic}"\n\nWrite ONE tweet (max 220 chars) that:\n- Calls people to come vent about this\n- Is angry, punchy, darkly funny\n- Ends with "→ rageagent.lol 🔥"\n- No hashtags, no quotes around the text\nJust the tweet text, nothing else.`;
-  const text = await generateTweetText(prompt);
-  if (text) {
-    await client.v2.tweet(text.slice(0, 280));
-    console.log('🐦 Daily topic tweet:', text);
-  }
-}
-
-async function postGeoRantTweet() {
-  const client = getTwitterBotClient();
-  if (!client) return;
-  const prompt = `You are RAGE (@therageagent), a darkly funny anger companion. Write a tweet about a universal frustration that people everywhere relate to.\n\nPick from themes like: cost of living, housing prices, bureaucracy going nowhere, broken promises by institutions, wealth inequality, waiting forever for things that should be simple, systems that grind ordinary people down.\n\nStrict rules:\n- Max 220 chars\n- Darkly funny, punchy, universally relatable\n- NEVER name specific politicians, political parties, countries, religions, or ethnic groups\n- No divisive politics — speak to shared human frustration only\n- Ends with "— @therageagent"\nJust the tweet text, nothing else.`;
-  const text = await generateTweetText(prompt);
-  if (text) {
-    await client.v2.tweet(text.slice(0, 280));
-    console.log('🌍 Geo rant tweet:', text);
-  }
-}
-
-// Runs every minute; daily tweet at 10:00 UTC, geo rant every 5h
-let lastDailyTweetDate = '';
-let lastGeoTweetTime = 0;
-
-function startTweetScheduler() {
-  if (!TWITTER_APP_KEY) {
-    console.log('   Twitter bot: disabled (set TWITTER_APP_KEY to enable)');
-    return;
-  }
-  console.log('   Twitter bot: enabled 🐦');
-  setInterval(async () => {
-    const now = new Date();
-    const utcHour = now.getUTCHours();
-    const todayStr = now.toISOString().slice(0, 10);
-
-    // Daily topic tweet at 10:00 UTC
-    if (utcHour === 10 && lastDailyTweetDate !== todayStr) {
-      lastDailyTweetDate = todayStr;
-      postDailyTopicTweet().catch(e => console.error('Daily tweet error:', e.message));
-    }
-
-    // Geo rant every 5 hours
-    if (Date.now() - lastGeoTweetTime >= 5 * 60 * 60 * 1000) {
-      lastGeoTweetTime = Date.now();
-      postGeoRantTweet().catch(e => console.error('Geo tweet error:', e.message));
-    }
-  }, 60 * 1000);
-}
-
 // ─── Deploy webhook ───────────────────────────────────────────────────────────
 app.post('/deploy', (req, res) => {
   const token = req.headers['x-deploy-token'];
@@ -608,6 +442,5 @@ app.listen(PORT, () => {
   console.log(`\n🔥 RAGE AGENT is live → http://localhost:${PORT}`);
   console.log(`   Model: ${GROQ_MODEL} via Groq`);
   console.log(`   Leaderboard entries: ${leaderboard.length}`);
-  startTweetScheduler();
   console.log('');
 });
